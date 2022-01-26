@@ -1,0 +1,41 @@
+{
+  "name": "my-app-cdk-stack",
+  "version": "0.0.1",
+  "private": true,
+  "bin": {
+    "my-app-cdk": "bin/my-app-cdk.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "cdkd": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
+    "cdk:bootstrap": "cdk bootstrap",
+    "cdk:clean": "rm -rf cdk.out",
+    "cdk:destroy": "cdk destroy",
+    "cdk:full": "yarn cdk:clean && yarn cdks && yarn cdk:bootstrap && yarn cdkd",
+    "cdks": "yarn && yarn cdk:clean && $npm_package_env_PROD \\time cdk synth --path-metadata false --report-versioning false --quiet",
+    "test": "jest",
+    "watch": "tsc -w"
+  },
+  "env": {
+    "DEV": "env-cmd -f ./.env/development.env.js",
+    "LOCAL": "env-cmd -f ./.env/.local.env.js",
+    "PROD": "env-cmd -f ./.env/production.env.js",
+    "TEST": "env-cmd -f ./.env/testing.env.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "@types/node": "10.17.27",
+    "aws-cdk": "^2.8.0",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.8.0",
+    "constructs": "^10.0.0",
+    "env-cmd": "^10.1.0",
+    "source-map-support": "^0.5.16"
+  }
+}

@@ -1,0 +1,36 @@
+#
+# .gitignore
+#
+
+# Include all .env files in directory but not .secrets
+!.env/
+.secrets.js
+.local.env.js
+
+# dependencies
+node_modules/
+
+# cdk synth
+cdk.out/
+
+# ignore
+.git-DISABLED/
+.ignore/
+
+# misc
+.DS_Store
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# yarn
+.pnp/
+.pnp.js
+
+
+# Include all .env files in directory but not .secrets
+!.env/
+.secrets.js
+
