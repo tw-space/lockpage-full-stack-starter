@@ -1,6 +1,6 @@
 # Lockpage Full Stack Starter
 
-Deploy a new password protected Next.js app to AWS securely in less than 10 minutes.
+Deploy a new password protected Next.js app to AWS securely in 10 minutes.
 
 * [Overview](#overview)
 * [Getting Started](#getting-started)
@@ -288,8 +288,8 @@ Let's add an app variation called `cinematic`.
 
     ```js
     switch (req.body[process.env.KEY_NAME]) {
-      case process.env.SECRET_KEY_MASTER:
-        jwtSub = process.env.JWT_SUB_MASTER
+      case process.env.SECRET_KEY_MAIN:
+        jwtSub = process.env.JWT_SUB_MAIN
         break
       case process.env.SECRET_KEY_GUEST:
         jwtSub = process.env.JWT_SUB_GUEST
