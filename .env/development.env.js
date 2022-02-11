@@ -3,6 +3,7 @@
 // Development environment variables for custom server
 //
 const envCommon = require('./common.env.js')
+const flagsDevelopment = require('./development.flags.js')
 const {
   jwtSubGuest,
   jwtSubMain,
@@ -16,6 +17,7 @@ const {
 
 const envDevelopment = {
   ...envCommon,
+  ...flagsDevelopment,
   JWT_SUB_GUEST: jwtSubGuest || '',
   JWT_SUB_MAIN: jwtSubMain || '',
   NEXT_PUBLIC_API_MOCKING: 'disabled',

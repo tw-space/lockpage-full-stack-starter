@@ -3,6 +3,7 @@
 // Test environment variables for custom server
 //
 const envCommon = require('./common.env.js')
+const flagsTest = require('./test.flags.js')
 const {
   jwtSubGuest,
   jwtSubMain,
@@ -19,6 +20,7 @@ const port = process.env.OVERRIDE_PORT || '3000'
 
 const envTest = {
   ...envCommon,
+  ...flagsTest,
   JWT_SUB_GUEST: jwtSubGuest || '',
   JWT_SUB_MAIN: jwtSubMain || '',
   NEXT_PUBLIC_API_MOCKING: 'disabled',

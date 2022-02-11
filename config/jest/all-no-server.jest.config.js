@@ -1,5 +1,5 @@
 //
-// app.jest.config.js
+// allbutserver.jest.config.js
 //
 const nextJest = require('next/jest')
 
@@ -12,8 +12,8 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   displayName: {
-    name: 'app',
-    color: 'green',
+    name: 'all (no server)',
+    color: 'cyan',
   },
   globals: {
     babelConfig: ['../../babel.config.js', '../../babel-plugin-macros.config.js'],
@@ -29,8 +29,8 @@ const customJestConfig = {
   setupFiles: [`<rootDir>/config/jest/loadershim.js`],
   setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: [`/node_modules/`, `/.cache/`, `/public/`, `/__specs__/`, `/specs/`, `/cdk/`],
-  testMatch: [`<rootDir>/src/**/?(*.)+(test).[jt]s?(x)`],
+  testPathIgnorePatterns: [`/node_modules/`, `/.cache/`, `/public/`, `/__specs__/`, `/specs/`, `/cdk/`, `/server/`],
+  testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
   transform: {
     '^.+\\.jsx?$': `<rootDir>/config/jest/jest-preprocess.js`,
     '.+\\.(css|styl|less|sass|scss)$': 'jest-transform-css',

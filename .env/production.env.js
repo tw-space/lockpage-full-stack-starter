@@ -2,6 +2,7 @@
 // production.env.js
 //
 const envCommon = require('./common.env.js')
+const flagsProduction = require('./production.flags.js')
 const {
   jwtAud,
   jwtIss,
@@ -12,10 +13,11 @@ const {
   secretJWT,
   secretKeyMain,
   secretKeyGuest,
-} = require('./.production.secrets.js')
+} = require('./.production.secrets.js') // populated by deploy script
 
 const envProduction = {
   ...envCommon,
+  ...flagsProduction,
   JWT_AUD: jwtAud || '',
   JWT_ISS: jwtIss || '',
   JWT_SUB_GUEST: jwtSubGuest || '',

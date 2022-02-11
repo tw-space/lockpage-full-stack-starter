@@ -13,6 +13,12 @@ Deploy a new password protected Next.js app to AWS securely in 10 minutes.
   * [Destroy the CDK stack](#destroy-the-cdk-stack)
 * [Serving different variations for different passwords](#serving-different-variations-for-different-passwords)
   * [Adding an app variation](#adding-an-app-variation)
+* [Testing](#testing)
+  * [Jest unit tests](#jest-unit-tests)
+  * [Testcafe integration tests](#testcafe-integration-tests)
+  * [PR tests](#pr-tests)
+* [Development](#development)
+  * [Feature flags](#feature-flags)
 * [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites)
   * [|1| Create an AWS account](#1-create-an-aws-account)
   * [|2| Configure the AWS Command Line Interface CLI](#2-configure-the-aws-command-line-interface-cli)
@@ -358,6 +364,61 @@ Testcafe can run **integration tests** in the actual browser. It supports **seve
 ### PR Tests
 
 This starter includes a [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow which automatically runs **PR tests** when creating a new Pull Request into *master* branch. 
+
+## Development
+
+### Feature flags
+
+This starter includes basic support for **feature flags** to support [trunk-based development](https://trunkbaseddevelopment.com). 
+
+For example, when beginning a new feature, you can:
+
+1.  Add a new flag in `.env/development.flags.js` with name `FLAG_NEW_FEATURE` and set its value to `'on'`:
+
+    ```js
+    // .env/development.flags.js
+    const flagsDevelopment = {
+      FLAG_NEW_FEATURE: 'on',
+    }
+    ```
+
+    *Note:* Flags' environment variable names must be in **snake uppercase** format and begin with `'FLAG_'`.
+    
+2.  In app code, write new implementation logic that runs in development mode but **not in production** by surrounding it like in this example:
+
+    ```js
+    import * as flag from '../utils/code-flags'
+
+    if (flag.isEnabled('newFeature')) {
+      /* Only runs if process.env.FLAG_NEW_FEATURE is set to 'on' */
+    }
+    else { /*...*/ }
+    ```
+
+3.  Alternatively when **testing variants**, use `getVariant()` to check a flag's value directly:
+
+    ```js
+    import * as flag from '../utils/code-flags'
+    
+    if (flag.getVariant('featureWithVariant') === 'blue') {
+      /* Only runs if process.env.FLAG_FEATURE_WITH_VARIANT has value 'blue' */
+    } else if (flag.getVariant('featureWithVariant') === 'green') {
+      /* Only runs if process.env.FLAG_FEATURE_WITH_VARIANT has value 'green' */
+    }
+    else { /*...*/ }
+    ```
+    
+4.  Commit this code into the trunk knowing it **won't affect production code**.
+5.  When ready to **enable in production**, add the appropriate flag in `.env/production.flags.js`:
+
+    ```js
+    // .env/production.flags.js
+    const flagsProduction = {
+      FLAG_NEW_FEATURE: 'on',
+    }
+    ```
+
+6.  Finally, when the feature is demonstrated to work in production and all is well, remember to **remove this flag's code** to keep things tidy.
 
 ## Appendix: Preparing the AWS Prerequisites
 
