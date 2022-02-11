@@ -3,8 +3,11 @@
 //
 const envCommon = require('./common.env.js')
 const {
+  jwtAud,
+  jwtIss,
   jwtSubGuest,
   jwtSubMain,
+  rootPwd,
   secretCookie,
   secretJWT,
   secretKeyMain,
@@ -13,18 +16,17 @@ const {
 
 const envProduction = {
   ...envCommon,
-  JWT_AUD: 'thinkinside.net',
-  JWT_ISS: 'thinkinside.net',
+  JWT_AUD: jwtAud || '',
+  JWT_ISS: jwtIss || '',
   JWT_SUB_GUEST: jwtSubGuest || '',
   JWT_SUB_MAIN: jwtSubMain || '',
   NEXT_PUBLIC_API_MOCKING: 'disabled',
   PORT: '80',
-  ROOT_PWD: '/home/ubuntu/server/lockpage-full-stack-starter',
+  ROOT_PWD: rootPwd || '/home/ubuntu/server/lockpage-full-stack-starter',
   SECRET_COOKIE: secretCookie || '',
   SECRET_JWT: secretJWT || '',
   SECRET_KEY_GUEST: secretKeyGuest || '',
   SECRET_KEY_MAIN: secretKeyMain || '',
-  TESTING_ENV: '0',
   TRUE_ENV: 'production',
 }
 

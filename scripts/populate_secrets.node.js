@@ -1,6 +1,6 @@
 /* eslint no-console: 'off' */
 //
-// populate_secrets.js
+// populate_secrets.node.js
 //
 const fs = require('fs')
 const path = require('path')
@@ -21,11 +21,14 @@ ssm.getParametersByPath({
 }).promise()
   .then((data) => {
 
-    // |2| Create 
+    // |2| Create .production.secrets file
 
     const secrets = {
+      jwtAud: null,
+      jwtIss: null,
       jwtSubGuest: null,
       jwtSubMain: null,
+      rootPwd: '/home/ubuntu/server/lockpage-full-stack-starter',
       secretCookie: null,
       secretJWT: null,
       secretKeyGuest: null,
@@ -42,16 +45,22 @@ ssm.getParametersByPath({
         //
         // secrets.js
         //
+        const jwtAud = '${secrets.jwtAud}'
+        const jwtIss = '${secrets.jwtIss}'
         const jwtSubGuest = '${secrets.jwtSubGuest}'
         const jwtSubMain = '${secrets.jwtSubMain}'
+        const rootPwd = '${secrets.rootPwd}'
         const secretCookie = '${secrets.secretCookie}'
         const secretJWT = '${secrets.secretJWT}'
         const secretKeyGuest = '${secrets.secretKeyGuest}'
         const secretKeyMain = '${secrets.secretKeyMain}'
 
         module.exports = {
+          jwtAud,
+          jwtIss,
           jwtSubGuest,
           jwtSubMain,
+          rootPwd,
           secretCookie,
           secretJWT,
           secretKeyGuest,

@@ -355,6 +355,10 @@ Testcafe can run **integration tests** in the actual browser. It supports **seve
     $ yarn testcafe:main  # test against https://localhost:3000
     ```
 
+### PR Tests
+
+This starter includes a [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow which automatically runs **PR tests** when creating a new Pull Request into *master* branch. 
+
 ## Appendix: Preparing the AWS Prerequisites
 
 To configure your app for deployment to AWS, you will need to provide these six values in `cdk/.env/.secrets.js`:

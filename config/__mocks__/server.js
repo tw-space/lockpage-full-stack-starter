@@ -1,5 +1,5 @@
 // 
-// test/__mocks__/server.js
+// __mocks__/server.js
 //
 import { setupServer } from 'msw/node'
 import { mockHandlers } from './mockHandlers'

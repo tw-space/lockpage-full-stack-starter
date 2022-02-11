@@ -136,7 +136,7 @@ describe('Lockpage', () => {
 
     beforeEach(() => {
       // start Mock Service Worker to mock api for testing
-      require('../../../../test/__mocks__')
+      require('../../../../config/__mocks__')
 
       userEvent.type(httpLockbox, `${inputText}`)
     })

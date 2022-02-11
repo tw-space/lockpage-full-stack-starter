@@ -33,27 +33,29 @@ describe('app server', () => {
       expect(res.headers.location).toEqual(redirectPath)
     })
 
-    it('should set secure headers as expected', () => {
-      expect(res.headers['content-security-policy']).toEqual(
-        "default-src 'self';base-uri 'self';connect-src 'self';font-src 'self' data:;form-action 'self';frame-ancestors 'none';frame-src 'none';img-src 'self' data:;media-src 'none';object-src 'none';sandbox allow-forms allow-scripts allow-same-origin;style-src 'self' 'unsafe-inline';script-src 'self';script-src-attr 'none';block-all-mixed-content;upgrade-insecure-requests",
-      )
-      expect(res.headers['cross-origin-embedder-policy']).toEqual('require-corp')
-      expect(res.headers['cross-origin-opener-policy']).toEqual('same-origin')
-      expect(res.headers['cross-origin-resource-policy']).toEqual('same-origin')
-      expect(res.headers['x-dns-prefetch-control']).toEqual('off')
-      expect(res.headers['expect-ct']).toEqual('max-age=0')
-      expect(res.headers['x-frame-options']).toEqual('SAMEORIGIN')
-      expect(res.headers['strict-transport-security']).toEqual(
-        'max-age=15552000; includeSubDomains',
-      )
-      expect(res.headers['x-download-options']).toEqual('noopen')
-      expect(res.headers['x-content-type-options']).toEqual('nosniff')
-      expect(res.headers['origin-agent-cluster']).toEqual('?1')
-      expect(res.headers['x-permitted-cross-domain-policies']).toEqual('none')
-      expect(res.headers['x-xss-protection']).toEqual('0')
-      expect(res.headers['referrer-policy']).toEqual(
-        'no-referrer,strict-origin-when-cross-origin',
-      )
+    it('should set secure headers (except in PR test)', () => {
+      if (!(process.env.DEPLOYMENT_PURPOSE === 'PR-test')) {
+        expect(res.headers['content-security-policy']).toEqual(
+          "default-src 'self';base-uri 'self';connect-src 'self';font-src 'self' data:;form-action 'self';frame-ancestors 'none';frame-src 'none';img-src 'self' data:;media-src 'none';object-src 'none';sandbox allow-forms allow-scripts allow-same-origin;style-src 'self' 'unsafe-inline';script-src 'self';script-src-attr 'none';block-all-mixed-content;upgrade-insecure-requests",
+        )
+        expect(res.headers['cross-origin-embedder-policy']).toEqual('require-corp')
+        expect(res.headers['cross-origin-opener-policy']).toEqual('same-origin')
+        expect(res.headers['cross-origin-resource-policy']).toEqual('same-origin')
+        expect(res.headers['x-dns-prefetch-control']).toEqual('off')
+        expect(res.headers['expect-ct']).toEqual('max-age=0')
+        expect(res.headers['x-frame-options']).toEqual('SAMEORIGIN')
+        expect(res.headers['strict-transport-security']).toEqual(
+          'max-age=15552000; includeSubDomains',
+        )
+        expect(res.headers['x-download-options']).toEqual('noopen')
+        expect(res.headers['x-content-type-options']).toEqual('nosniff')
+        expect(res.headers['origin-agent-cluster']).toEqual('?1')
+        expect(res.headers['x-permitted-cross-domain-policies']).toEqual('none')
+        expect(res.headers['x-xss-protection']).toEqual('0')
+        expect(res.headers['referrer-policy']).toEqual(
+          'no-referrer,strict-origin-when-cross-origin',
+        )
+      }
     })
   })
 

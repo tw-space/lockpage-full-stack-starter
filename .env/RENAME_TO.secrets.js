@@ -29,6 +29,8 @@
 //        --type "SecureString" \
 //        --overwrite
 //
+const jwtAud = 'your domain name'
+const jwtIss = 'your domain name'
 const jwtSubGuest = 'jwtSubGuest secret'
 const jwtSubMain = 'jwtSubMain secret'
 const rootPwd = '.' // absolute path to local project dir for dev and testing
@@ -39,6 +41,8 @@ const secretKeyMain = 'main secret'
 const useHttpsLocal = '0'
 
 module.exports = {
+  jwtAud,
+  jwtIss,
   jwtSubGuest,
   jwtSubMain,
   rootPwd,

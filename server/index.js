@@ -22,6 +22,7 @@ const handle = nextApp.getRequestHandler()
 
 const lockpageStaticDir = path.resolve(__dirname, `../${process.env.LOCKPAGE_DIR}`)
 const loginPath = process.env.LOGIN_PATH
+const isPRTest = process.env.DEPLOYMENT_PURPOSE === 'PR-test'
 const useHttpsLocal = process.env.USE_HTTPS_LOCAL !== '0'
 
 //
@@ -34,8 +35,8 @@ nextApp
 
     const app = express()
 
-    // Configure secure headers with helmet, unless using http local
-    if (!(isDev && !useHttpsLocal)) {
+    // Configure secure headers with helmet, unless using http local or in PR test
+    if (!((isDev && !useHttpsLocal) || isPRTest)) {
       app.use(setHelmet())
     }
 
@@ -85,13 +86,13 @@ nextApp
         .listen(port, (err) => {
           if (err) throw err
           // eslint-disable-next-line no-console
-          console.error(`Node dev server (https): listening on port ${port}`)
+          console.log(`Node dev server (https): listening on port ${port}`)
         })
     } else {
       app.listen(port, (err) => {
         if (err) throw err
         // eslint-disable-next-line no-console
-        console.error(
+        console.log(
           `Node ${
             // eslint-disable-next-line
             isDev ? 'dev server' : 'process ' + process.pid

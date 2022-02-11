@@ -1,5 +1,5 @@
 //
-// test/__mocks__/browser.js
+// __mocks__/browser.js
 // starts a msw Mock Service Worker instance
 //
 import { setupWorker } from 'msw'

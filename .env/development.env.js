@@ -25,7 +25,6 @@ const envDevelopment = {
   SECRET_JWT: secretJWT || '',
   SECRET_KEY_GUEST: secretKeyGuest || '',
   SECRET_KEY_MAIN: secretKeyMain || '',
-  TESTING_ENV: '0',
   TRUE_ENV: 'development',
   USE_HTTPS_LOCAL: useHttpsLocal || '0',
 }

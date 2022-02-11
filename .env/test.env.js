@@ -15,7 +15,7 @@ const {
 } = require('./.secrets.js')
 
 const nextDevPort = '4000'
-const port = '3000'
+const port = process.env.OVERRIDE_PORT || '3000'
 
 const envTest = {
   ...envCommon,
@@ -29,7 +29,6 @@ const envTest = {
   SECRET_JWT: secretJWT || '',
   SECRET_KEY_GUEST: secretKeyGuest || '',
   SECRET_KEY_MAIN: secretKeyMain || '',
-  TESTING_ENV: '1',
   TRUE_ENV: 'test',
   URL_DEV: `http://localhost:${nextDevPort}`,
   URL_LOCAL: useHttpsLocal === '0' ? `http://localhost:${port}` : `https://localhost:${port}`,

@@ -6,7 +6,7 @@ import { normalize } from '../styles/tw-stitches-normalize'
 
 // start Mock Service Worker when flagged to mock api
 if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
-  require('../../../test/__mocks__')
+  require('../../../config/__mocks__')
 }
 
 let baseFontPath = '/'

@@ -1,5 +1,5 @@
 //
-// guest.testcaferc.js
+// main.testcaferc.js
 //
 module.exports = {
   browsers: ['chrome:headless'],
@@ -8,9 +8,9 @@ module.exports = {
   ],
   debugOnFail: true,
   screenshots: {
-    path: 'test/testcafe/__screenshots__',
+    path: 'config/testcafe/__screenshots__',
   },
   src: [
-    'src/pages/_guest/**/*.spec.js',
+    'src/pages/_main/**/*.spec.js',
   ],
 }

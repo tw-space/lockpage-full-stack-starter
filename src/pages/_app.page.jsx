@@ -6,7 +6,7 @@ import { normalize } from '../styles/tw-stitches-normalize'
 
 // start Mock Service Worker in development and testing to mock api
 if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
-  require('../../test/__mocks__')
+  require('../../config/__mocks__')
 }
 
 // const customGlobalStyles = {}

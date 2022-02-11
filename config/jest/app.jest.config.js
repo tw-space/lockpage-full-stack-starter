@@ -1,5 +1,5 @@
 //
-// guest.jest.config.js
+// app.jest.config.js
 //
 const nextJest = require('next/jest')
 
@@ -12,8 +12,8 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   displayName: {
-    name: 'guest',
-    color: 'blue',
+    name: 'app',
+    color: 'green',
   },
   globals: {
     babelConfig: ['../../babel.config.js', '../../babel-plugin-macros.config.js'],
@@ -23,16 +23,16 @@ const customJestConfig = {
   // the below for alias' to work
   moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleNameMapper: {
-    '.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': `<rootDir>/test/__mocks__/file-mock.js`,
+    '.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': `<rootDir>/config/__mocks__/file-mock.js`,
   },
   rootDir: '../../',
-  setupFiles: [`<rootDir>/test/jest/loadershim.js`],
-  setupFilesAfterEnv: [`<rootDir>/test/jest/jest.setup.js`, `jest-extended/all`],
+  setupFiles: [`<rootDir>/config/jest/loadershim.js`],
+  setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: [`node_modules`, `.cache`, `public`, `__specs__`, `specs`],
-  testMatch: [`<rootDir>/src/_guest/**/?(*.)+(test).[jt]s?(x)`],
+  testMatch: [`<rootDir>/src/**/?(*.)+(test).[jt]s?(x)`],
   transform: {
-    '^.+\\.jsx?$': `<rootDir>/test/jest/jest-preprocess.js`,
+    '^.+\\.jsx?$': `<rootDir>/config/jest/jest-preprocess.js`,
     '.+\\.(css|styl|less|sass|scss)$': 'jest-transform-css',
   },
   verbose: true,
