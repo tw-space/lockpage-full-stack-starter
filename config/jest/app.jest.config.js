@@ -27,7 +27,7 @@ const customJestConfig = {
   },
   rootDir: '../../',
   setupFiles: [`<rootDir>/config/jest/loadershim.js`],
-  setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`],
+  setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`, `<rootDir>/config/jest/models.jest.setup.js`],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: [`/node_modules/`, `/.cache/`, `/public/`, `/__specs__/`, `/specs/`, `/cdk/`],
   testMatch: [`<rootDir>/src/**/?(*.)+(test).[jt]s?(x)`],

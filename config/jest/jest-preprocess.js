@@ -9,7 +9,6 @@ const babelOptions = {
         fileName: true,
         minify: false,
         meaninglessFileNames: ['index', 'styles'],
-        // namespace: 'my-app-name',
         pure: false,
         preprocess: true,
         transpileTemplateLiterals: false,

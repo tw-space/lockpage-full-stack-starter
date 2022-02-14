@@ -1,0 +1,48 @@
+#
+# docker-compose-dev-fw-pg.yml
+#
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:12-alpine
+    container_name: my-app-db
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_DEV_DATABASE_NAME}
+      - POSTGRES_USER=${DB_DEV_USER}
+      - POSTGRES_PASSWORD=${DB_DEV_PASSWORD}
+    volumes:
+      - type: volume
+        source: flyway-pg-data
+        target: /var/lib/postgresql
+    ports:
+      - ${DB_DEV_PORT}:5432
+
+  flyway:
+    image: flyway/flyway:latest-alpine
+    container_name: my-app-flyway
+    command: -configFiles=/flyway/conf/flyway.config migrate info
+    environment:
+      - DB_DEV_DATABASE_NAME=${DB_DEV_DATABASE_NAME}
+      - DB_DEV_HOST=${DB_DEV_HOST}
+      - DB_DEV_PASSWORD=${DB_DEV_PASSWORD}
+      - DB_DEV_PORT=${DB_DEV_PORT}
+      - DB_DEV_USER=${DB_DEV_USER}
+    volumes:
+      - type: bind
+        source: ../migrations
+        target: /flyway/sql
+      - type: bind
+        source: ../conf/flyway-dev.config
+        target: /flyway/conf/flyway.config
+    depends_on:
+      - postgres
+
+volumes:
+  flyway-pg-data:
+
+networks:
+  default:
+    name: flyway-pg-network

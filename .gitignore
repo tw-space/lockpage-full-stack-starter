@@ -12,6 +12,7 @@ node_modules/
 # self-signed certificates for local https testing
 *.key
 *.crt
+*.pem
 
 # next.js
 .next/
@@ -26,7 +27,6 @@ build/
 
 # misc
 .DS_Store
-*.pem
 
 # ignore
 .git-DISABLED/

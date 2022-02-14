@@ -169,8 +169,10 @@ describe('app server', () => {
         expect(cookieObject).toContainKey('HttpOnly')
       })
 
-      it('should contain key "Secure"', () => {
-        expect(cookieObject).toContainKey('Secure')
+      it('should contain key "Secure" (except in PR test)', () => {
+        if (!(process.env.DEPLOYMENT_PURPOSE === 'PR-test')) {
+          expect(cookieObject).toContainKey('Secure')
+        }
       })
 
       it('should contain "SameSite": "Strict"', () => {

@@ -13,9 +13,11 @@ hooks:
   AfterInstall:               # Configure app, permissions
     - location: scripts/populate_secrets.sh
       timeout: 120
+    - location: scripts/db_prod_migrate.sh
+      timeout: 120
   ApplicationStart:           # Start app, restart stopped services
     - location: scripts/start_server.sh
-      timeout: 300
+      timeout: 240
       # runas: ubuntu         # Changed codedeploy agent to run as ubuntu
   # ValidateService:          # Verify deployment
   # BeforeBlockTraffic:       # Before deregistering from LB

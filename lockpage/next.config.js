@@ -2,6 +2,12 @@
 // next.config.js for lockpage
 //
 module.exports = {
+  eslint: {
+    dirs: [
+      'src',
+    ],
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   pageExtensions: [
     'page.tsx',

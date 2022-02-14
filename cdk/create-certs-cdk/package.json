@@ -1,0 +1,51 @@
+{
+  "name": "create-certs-cdk-stack",
+  "version": "0.1.2",
+  "private": true,
+  "bin": {
+    "create-certs-cdk": "bin/create-certs-cdk.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "cdk:bootstrap": "$npm_package_env_PROD cdk bootstrap",
+    "cdk:clean": "rm -rf cdk.out",
+    "cdk:deploy": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
+    "cdk:deploy:norollback": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
+    "cdk:destroy": "$npm_package_env_PROD cdk destroy",
+    "cdk:full": "yarn cdk:synth && yarn cdk:bootstrap && yarn cdk:deploy",
+    "cdk:precheck": "$npm_package_env_PROD scripts/certs-precheck.sh",
+    "cdk:synth": "yarn && yarn cdk:precheck && yarn cdk:clean && $npm_package_env_PROD \\time cdk synth --path-metadata false --report-versioning false --quiet",
+    "cdkd": "yarn cdk:deploy",
+    "cdks": "yarn cdk:synth",
+    "test": "jest",
+    "watch": "tsc -w"
+  },
+  "env": {
+    "DEV": "env-cmd -f ./.env/development.env.js",
+    "PROD": "env-cmd -f ./.env/production.env.js",
+    "TEST": "env-cmd -f ./.env/test.env.js"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "latest",
+    "constructs": "^10.0.0",
+    "env-cmd": "^10.1.0",
+    "source-map-support": "^0.5.16"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
+    "@types/jest": "^26.0.10",
+    "@types/node": "10.17.27",
+    "@typescript-eslint/eslint-plugin": "^5.10.2",
+    "@typescript-eslint/parser": "^5.10.2",
+    "aws-cdk": "latest",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
+  }
+}

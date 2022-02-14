@@ -1,15 +1,24 @@
 //
-// main/index.page.jsx
+// main / index.page.jsx
 //
+import FamousPeople from '../../../models/FamousPeople'
 import { styled } from '../../../stitches.config'
-import Welcome from '../../page-components/Welcome'
+import FamousPeopleHomePage from '../../page-components/FamousPeopleHomePage'
 
-export default function Index() {
+function Index({ famousPeopleData }) {
   return (
     <IndexContainer>
-      <Welcome appName="Main" />
+      <FamousPeopleHomePage famousPeopleData={famousPeopleData} />
     </IndexContainer>
   )
 }
 
 const IndexContainer = styled('div', {})
+
+export async function getServerSideProps() {
+  const famousPeopleData = await FamousPeople.query()
+
+  return { props: { famousPeopleData: JSON.parse(JSON.stringify(famousPeopleData)) } }
+}
+
+export default Index

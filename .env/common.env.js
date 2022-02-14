@@ -1,11 +1,14 @@
 // 
 // common.env.js
 // 
+const ghaRepoName = process.env.GHA_REPO_NAME || ''
+
 const envCommon = {
+  GHA_REPO_NAME: ghaRepoName,
   JWT_ALG: 'HS256',
-  JWT_AUD: 'localhost',
+  JWT_AUD: '',
   JWT_EXP_IN: 86400000,  // 1 day
-  JWT_ISS: 'localhost',
+  JWT_ISS: '',
   JWT_NAME: 'access_token',
   JWT_SUB_GUEST: '',
   JWT_SUB_MAIN: '',
@@ -20,6 +23,7 @@ const envCommon = {
   SECRET_KEY_MAIN: '',
   SECRET_KEY_GUEST: '',
   SSM_PATH: '/my-app/prod/',
+  USE_HTTPS_FROM_S3: '',
   USE_HTTPS_LOCAL: '0',
 }
 

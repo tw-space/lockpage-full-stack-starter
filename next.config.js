@@ -1,4 +1,11 @@
 module.exports = {
+  eslint: {
+    dirs: [
+      'server',
+      'src',
+    ],
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   pageExtensions: [
     'page.tsx',

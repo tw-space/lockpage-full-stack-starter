@@ -18,16 +18,8 @@ test
 
 test
   .meta({ priority: 'P2' })  
-  ('should show title that contains \'Welcome to Main!\'', async t => {
+  ('should show title that contains \'Famous People App\'', async t => {
   const title = Selector('title')
 
-  await t.expect(title.innerText).contains('Welcome to Main!')
+  await t.expect(title.innerText).contains('Famous People App')
 })
-
-test
-  .meta({ priority: 'P2' })
-  ('should contain heading "Welcome to Main!"', async t => {
-    const heading = Selector('h1')
-
-    await t.expect(heading.innerText).eql('Welcome to Main!')
-  })

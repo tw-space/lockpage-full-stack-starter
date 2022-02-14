@@ -1,5 +1,5 @@
 //
-// allbutserver.jest.config.js
+// all-no-server.jest.config.js
 //
 const nextJest = require('next/jest')
 
@@ -27,10 +27,10 @@ const customJestConfig = {
   },
   rootDir: '../../',
   setupFiles: [`<rootDir>/config/jest/loadershim.js`],
-  setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`],
+  setupFilesAfterEnv: [`<rootDir>/config/jest/jest.setup.js`, `jest-extended/all`, `<rootDir>/config/jest/models.jest.setup.js`],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: [`/node_modules/`, `/.cache/`, `/public/`, `/__specs__/`, `/specs/`, `/cdk/`, `/server/`],
-  testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
+  testMatch: ['**/?(*.)+(test).[jt]s?(x)', '<rootDir>/.env/**/?(*.)+(test).[jt]s?(x)'],
   transform: {
     '^.+\\.jsx?$': `<rootDir>/config/jest/jest-preprocess.js`,
     '.+\\.(css|styl|less|sass|scss)$': 'jest-transform-css',

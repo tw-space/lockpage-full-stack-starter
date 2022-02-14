@@ -12,11 +12,15 @@ on:
 jobs:
   
   run-PR-tests:
+
     name: Run PR tests
     runs-on: ubuntu-latest
     env:
       DEPLOYMENT_PURPOSE: 'PR-test'
-
+      GHA_REPO_NAME: 'lockpage-full-stack-starter-private'
+      OVERRIDE_DB_PORT: '5432'
+      OVERRIDE_PORT: '80'
+    
     steps:
 
     - name: Checkout repository
@@ -34,7 +38,7 @@ jobs:
     
     - name: Unlock ports <1024 for node
       run: |
-        sudo setcap cap_net_bind_service=+ep $(which node)
+        sudo setcap cap_net_bind_service=+ep $(command -v node)
 
     - name: Install packages
       run: |
@@ -44,23 +48,19 @@ jobs:
       run: |
         yarn script:secrets:test:gh
     
+    - name: Setup dev database
+      run: |
+        yarn db:dev:setup
+    
     - name: Build code
       run: |
-        yarn build
+        yarn build:all:dev
         
-    - name: Start server (prod)
+    - name: Start server (dev/PR)
       id: server
       run: |
-        yarn start
-
+        yarn start:PR
+    
     - name: Run all jest tests
-      env:
-        OVERRIDE_PORT: '80'
       run: |
         yarn jest:all:prod
-
-    # - name: Run all testcafe tests for main
-    #   env:
-    #     OVERRIDE_PORT: '80'
-    #   run: |
-    #     yarn testcafe:main:prod

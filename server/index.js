@@ -1,5 +1,5 @@
 //
-// server/index.js
+// server / index.js
 //
 const fs = require('fs')
 const https = require('https')
@@ -23,7 +23,8 @@ const handle = nextApp.getRequestHandler()
 const lockpageStaticDir = path.resolve(__dirname, `../${process.env.LOCKPAGE_DIR}`)
 const loginPath = process.env.LOGIN_PATH
 const isPRTest = process.env.DEPLOYMENT_PURPOSE === 'PR-test'
-const useHttpsLocal = process.env.USE_HTTPS_LOCAL !== '0'
+const useHttpsLocal = process.env.USE_HTTPS_LOCAL === '1'
+const useHttpsFromS3 = process.env.USE_HTTPS_FROM_S3 === '1'
 
 //
 // Configure and start the custom server
@@ -73,8 +74,22 @@ nextApp
     // Authenticated; now pass to Next handler
     app.get('*', (req, res) => handle(req, res))
 
-    if (isDev && useHttpsLocal) {
-      // Use https when set in development and test
+    if (!isDev && useHttpsFromS3 && !isPRTest) {
+      https
+        .createServer(
+          {
+            cert: fs.readFileSync('../.certificates/fullchain.pem'),
+            key: fs.readFileSync('../.certificates/privkey.pem'),
+          },
+          app,
+        )
+        .listen(port, (err) => {
+          if (err) throw err
+          // eslint-disable-next-line no-console
+          console.log(`Node prod server (https): listening on port ${port}`)
+        })
+    } else if (isDev && useHttpsLocal) {
+      // Use localhost https when set in development and test
       https
         .createServer(
           {
@@ -177,7 +192,7 @@ function unlockWithKey(req, res) {
     } else {
       res.cookie(process.env.JWT_NAME, signedJWT, {
         maxAge: process.env.JWT_EXP_IN,
-        secure: !(isDev && !useHttpsLocal),
+        secure: !((isDev && !useHttpsLocal) || isPRTest),
         httpOnly: true,
         sameSite: 'Strict',
         signed: true,

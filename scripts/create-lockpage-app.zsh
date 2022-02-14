@@ -2,7 +2,6 @@
 #
 # create-lockpage-app.zsh
 # (runs with zsh or bash)
-#
 
 set -e
 
@@ -45,6 +44,10 @@ if [[ -z "$1" ]]; then
   if [[ ! -z "$project_name" ]]; then
     NAME="$project_name";
   fi
+  if [[ "$project_name" =~ " " ]]; then
+    echo "Error: Name cannot include whitespace"
+    exit 1
+  fi
 else
   NAME="$1";
 fi
@@ -53,25 +56,45 @@ fi
 echo ""
 mkdir "$NAME"
 cd "$NAME"
-git clone https://github.com/tw-space/lockpage-full-stack-starter .
+# git clone https://github.com/tw-space/lockpage-full-stack-starter .
+git clone --branch 0.1.2-famous-people git@github-tw-space:tw-space/lockpage-full-stack-starter-private .
 rm -rf .git
 git init
+
+# Prepare underscored version of NAME for database variables
+UNDERSCORED_NAME=${NAME//-/_}
 
 # Configure starter with project's name
 perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" package.json\
 && perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" appspec.yml\
 && perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" scripts/start_server.sh\
 && perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" scripts/populate_secrets.sh\
+&& perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" scripts/populate_secrets.node.js\
+&& perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" scripts/db_prod_migrate.sh\
 && perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" .env/production.env.js\
+&& perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" .env/test.env.js\
+&& perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" cdk/my-app-cdk/user-data/setup-codespace.sh\
+&& perl -i -pe"s/lockpage\-full\-stack\-starter[-a-z]*/$NAME/g" .github/workflows/run-PR-tests.yml\
 && perl -i -pe"s/my\-app/$NAME/g" .env/common.env.js\
 && perl -i -pe"s/my\-app/$NAME/g" .env/RENAME_TO.secrets.js\
-&& perl -i -pe"s/my\-app/$NAME/g" cdk/package.json\
-&& rename "s/my\-app/$NAME/g" cdk/test/my-app-cdk.test.ts\
-&& perl -i -pe"s/my\-app/$NAME/g" cdk/lib/my-app-cdk-stack.ts\
-&& rename "s/my\-app/$NAME/g" cdk/lib/my-app-cdk-stack.ts\
-&& perl -i -pe"s/my\-app/$NAME/g" cdk/bin/my-app-cdk.ts\
-&& rename "s/my\-app/$NAME/g" cdk/bin/my-app-cdk.ts\
-&& perl -i -pe"s/my\-app/$NAME/g" cdk/cdk.json\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/package.json\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/cdk.json\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/lib/my-app-cdk-stack.ts\
+&& perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-dev-fw-pg.yml\
+&& perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-prod-flyway.yml\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/test.env.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/development.env.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" scripts/populate_secrets_test_gh.node.js\
+&& cd cdk/my-app-cdk\
+&& rename "s/my\-app/$NAME/g" lib/my-app-cdk-stack.ts\
+&& perl -i -pe"s/my\-app/$NAME/g" bin/my-app-cdk.ts\
+&& rename "s/my\-app/$NAME/g" bin/my-app-cdk.ts\
+&& rename "s/my\-app/$NAME/g" test/my-app-cdk.test.ts\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/RENAME_TO.secrets.js\
+&& cd ../..\
+&& rename "s/my\-app/$NAME/g" cdk/my-app-cdk\
+&& perl -i -pe"s/my\-app/$NAME/g" README.md\
 && echo ""\
 && echo -e "Successfully created app $green$NAME$color_reset from$cyan lockpage-full-stack-starter$color_reset"\
 && echo ""\

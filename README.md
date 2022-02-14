@@ -13,12 +13,12 @@ Deploy a new password protected Next.js app to AWS securely in 10 minutes.
   * [Destroy the CDK stack](#destroy-the-cdk-stack)
 * [Serving different variations for different passwords](#serving-different-variations-for-different-passwords)
   * [Adding an app variation](#adding-an-app-variation)
+* [Development](#development)
+  * [Database and data models](#database-and-data-models)
+  * [Feature flags](#feature-flags)
 * [Testing](#testing)
   * [Jest unit tests](#jest-unit-tests)
   * [Testcafe integration tests](#testcafe-integration-tests)
-  * [PR tests](#pr-tests)
-* [Development](#development)
-  * [Feature flags](#feature-flags)
 * [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites)
   * [|1| Create an AWS account](#1-create-an-aws-account)
   * [|2| Configure the AWS Command Line Interface CLI](#2-configure-the-aws-command-line-interface-cli)
@@ -56,7 +56,9 @@ To try it locally, you will need:
 *   `zsh` or `bash`
 *   `wget` or `curl`
 *   `rename`
-*   `node`
+*   `node` *(v16.x.x)*
+*   `yarn` *(v1.x)*
+*   *Docker Engine* installed and running
 
 Later, to deploy to AWS, you will need:
 
@@ -65,7 +67,7 @@ Later, to deploy to AWS, you will need:
 3.  A **domain name** purchased in or imported into Amazon Route 53
 4.  A Route 53 **Hosted Zone** created for domain name
 5.  **Connection to GitHub** account/repo created in AWS Dev Tools
-6.  **HTTPS certificate** created or imported in AWS Certificate Manager
+6.  ~~**HTTPS certificate** created or imported in AWS Certificate Manager~~ *(not needed as of 0.1.3)*
 
 (See [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites) for a detailed walkthrough)
 
@@ -132,61 +134,44 @@ To run the **guest** variation:
 
 By default, both development servers will run in *http*, not *https*. The starter simplifies the setup for **local https development**, however, this is true only for the **custom server** (started with `yarn serve:dev` or `yarn start:dev`, *not* the hot reloading server started with `yarn dev`). 
 
-Here are the steps:
-
-1.  Ensure `openssl` is installed
-2.  To generate self-signed certificates in `server/`, run:
-    
-    ```sh
-    $ yarn gencerts
-    ```
-
-    *Note:* Your `.gitignore` will already ignore `*.key` and `*.crt`
-
-3.  In `.env/.secrets.js`, set `useHttpsLocal` to `'1'`
-4.  Start the server:
-
-    ```sh
-    $ yarn start:dev
-    ```
-
-5.  Visit `https://localhost:3000` (note the `'s'`) and approve the certificate when prompted (first time only)
+Run `yarn serve:dev` or `yarn https:local:setup` to get started.
 
 ### Deploy to production with AWS CDK & AWS CodePipeline
 
-This starter streamlines your deployment to a fully functional and secure stack hosted on AWS and set up for **continuous deployment**. Your `cdk/` directory contains *Infrastructure as Code (IaC)*, a complete infrastructure stack written with the **AWS Cloud Development Kit (CDK)**, which defines and configures AWS elements in TypeScript. 
+This starter streamlines your deployment to a fully functional and secure stack hosted on AWS and set up for **Continuous Deployment**. Your `cdk/my-app-cdk/` directory contains *Infrastructure as Code (IaC)*, a complete infrastructure stack written with the **AWS Cloud Development Kit (CDK)**, which defines and configures AWS elements in TypeScript. 
 
-Once your AWS prerequisites are set up, the entire first-time stack and code deployment takes **less than 10 minutes**. All resources created by the stack **run for free** under the AWS Free Tier (which lasts 12 months from account creation) when no other resources are also running (in particular other Load Balancers or EC2 instances).
+Once your AWS prerequisites are set up, the entire first-time stack and code deployment takes **less than 10 minutes**. All resources created by the stack **run for free** under the AWS Free Tier (which lasts 12 months from account creation) when no other resources are also running (in particular other Load Balancers, EC2, or RDS instances).
 
 Here are the steps:
 
-1.  Rename `cdk/.env/RENAME_TO.secrets.js` to `.secrets.js`
-2.  Commit & push the project to a GitHub repo
+1.  Rename `cdk/my-app-cdk/.env/RENAME_TO.secrets.js` to `.secrets.js`
+2.  Commit & push your new project to a GitHub repo
 3.  Ensure the following are prepared for AWS (see [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites) for a detailed walkthrough):
     1. An **AWS account** created
     2. **AWS CLI** configured
     3. A **domain name** purchased in or imported into Amazon Route 53
     4. A Route 53 **Hosted Zone** created for domain name
     5. **Connection to GitHub** account/repo created in AWS Dev Tools
-    6. **HTTPS certificate** created or imported in AWS Certificate Manager
-4.  Set the proper values for these in `cdk/.env/.secrets.js`
-5.  Optionally change the value defaults in `.env/.secrets.js`
-6.  Put secrets prefixed with `jwt` or `secret` in your AWS SSM Parameter Store (see steps in `.env/.secrets.js`)
-7.  From `cdk/`, to deploy, run:
+    6. ~~**HTTPS certificate** created or imported in AWS Certificate Manager~~ *(not needed as of 0.1.3)*
+4.  Set the proper values for these in `cdk/my-app-cdk/.env/.secrets.js`
+5.  To serve your web app using free, properly signed HTTPS encryption, navigate to `cdk/create-certs/` and run `yarn cdk:full`. When successfully complete, destroy the stack, and set `useHttpsFromS3` to `'1'` in `cdk/my-app-cdk/.env/.secrets.js`.
+6.  Optionally change any project secret defaults in `.env/.secrets.js`
+7.  Put all project secrets prefixed with `jwt`, `secret`, or `dbProd` in your AWS SSM Parameter Store (see steps in `.env/.secrets.js`)
+8.  From `cdk/my-app-cdk/`, synthesize and deploy your app infrastructure stack with:
 
     ```sh
     $ yarn cdk:full
     ```
 
-8.  When that's complete, go to **CodePipeline console,** ignore error, and click **Release Change**
-9.  When that's complete, visit your domain name (using **https**) in a browser
-10. Push changes to master to **continuously deploy** to production
+9.  When that's complete, go to **CodePipeline console**, ignore the deployment error, and click **Release Change** to retry the deployment
+10. When that's complete, visit your domain name (using **https**) in a browser
+11. Push changes to master to **continuously deploy** your app to production
 
 ### Destroy the CDK stack
 
 While all resources run for free under the Free Tier, it's a good practice to keep usage minimal by **regularly destroying** the **CDK stack** when not actively needing the production deployment:
 
-1.  From `cdk/`, run:
+1.  From `cdk/my-app-cdk/`, run:
 
     ```sh
     $ yarn cdk:destroy
@@ -318,60 +303,57 @@ Let's add an app variation called `cinematic`.
 
 10. That's it! Run the server locally with `yarn serve:dev` to try it. Then to test in production, create pages under `_cinematic/`, commit & push your changes to GitHub, wait a few minutes for your changes to deploy, then visit your domain to check the result.
 
-## Testing
-
-The starter includes **Jest unit tests** and **Testcafe integration tests**.
-
-### Jest (unit tests)
-
-1.  Run the included **Jest unit tests**, including tests of the custom server, with:
-
-    ```sh
-    $ yarn jest:all:build   # build all, start server, then run tests
-    $ yarn jest             # when built: start server, then run tests
-    ```
-
-    *Note:* Starting the server is only needed to bring the custom server under test. To run only the unit tests for the *lockpage*, which doesn't require starting a server, run:
-
-    ```sh
-    $ yarn jest:lockpage
-    ```
-
-2.  Only run the unit tests for **your app** under `src/` with:
-
-    ```sh
-    $ yarn jest:app     # only run tests under src/
-    ```
-  
-### Testcafe (integration tests)
-
-Testcafe can run **integration tests** in the actual browser. It supports **several browsers**, including Chrome, Firefox, and Safari.
-
-1.  First, start the server. You can do it one of two ways:
-
-    ```sh
-    $ yarn dev          # starts hot reloading src/pages/_main/ at http://localhost:4000
-    $ yarn start:test   # requires 'yarn build:all:test' first; runs at https://localhost:3000
-    ```
-
-2.  Depending on how you started the server, run `testcafe`:
-
-    ```sh
-    $ yarn testcafe       # test against http://localhost:4000
-    $ yarn testcafe:main  # test against https://localhost:3000
-    ```
-
-### PR Tests
-
-This starter includes a [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow which automatically runs **PR tests** when creating a new Pull Request into *master* branch. 
-
 ## Development
+
+### Database and data models
+
+This starter is configured to run and interface with **PostgreSQL** in local development and in production on an AWS RDS instance.
+
+For **local development**, running `yarn dev` will first run a script that will walk you through any unmet steps for running a *Postgres* database container locally (namely to have *Docker Engine* installed and running).
+
+This starter is preconfigured for **migration-based database development**, where all changes to a database are reflected in a sequence of **migration files**. Migration files are checked into a repository along with feature code, which makes the database effectively "versioned" alongside commits and releases.
+
+The system for running and tracking migrations is enabled by [Flyway](https://flywaydb.org) whose Community version is free to use. As Flyway is Java based, this starter provides scripts to run Flyway commands in a Docker container spun up on demand.
+
+Interacting with the database in client code is achieved through *Knex.js* database connections and *Objection.js* Model objects (which are built on *Knex.js*).
+
+A quick way to understand how all the pieces fit together is with an illustration of a typical workflow of making a change to the database:
+
+1.  You're working on version *0.0.0* of your app. You create a new sql file in `db/migrations` with a title following a very specific format, such as `V0.0.0_0__My_awesome_database.sql` (see [Flyway Migrations](https://flywaydb.org/documentation/concepts/migrations.html) for their naming conventions and requirements).
+
+2.  You write the changes you want to make to your database in *sql*, for example:
+
+    ```sql
+    /* V0.0.0_0__My_awesome_database.sql */
+    CREATE TABLE IF NOT EXISTS awesome_things (
+      awesome_thing_id int GENERATED ALWAYS AS IDENTITY primary key,
+      display_name text NOT NULL
+    );
+    ```
+
+3.  You add an additional sql migration file to insert test content into your database called `V0.0.0_1__TEST_Insert_awesome_things.sql`. Flyway will run migration files **in order** by their version number (in this case, `0.0.0_1` after `0.0.0_0`). (For ideas on how to organize release and test migration files separately, see [Organising your migrations](https://flywaydb.org/blog/organising-your-migrations).
+
+4.  You're ready to create your database. You run `yarn db:dev:setup` (or simply `yarn dev`) to run Flyway's `migrate` command on a new local Postgres database, all with Docker Compose. The script completes successfully and your local database is initialized and ready to go.
+
+5.  (Optional) You want to interact with the local database directly. You make sure `postgresql` is installed, and you run `yarn db:dev:connect:psql` to connect to the local database with `psql`. 
+
+6.  In your Next.js pages and components, you interface with your database primarily through Objection.js Models which you create in the `models/` directory. You create `models/AwesomeThings.js`, which defines a model for your database table per the guidelines at [Objection.js](https://vincit.github.io/objection.js/). You sometimes may interface with the database more directly by importing and using the `db/knex` object.
+
+7.  You write your pages' database queries as much as possible inside `getServerSideProps()` to achieve *server-side rendering*. (See [Data Fetching: getServerSideProps](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props)) 
+
+8.  You run `yarn dev` to interact with your app in the browser. `yarn dev` will also run all migrations found in `db/migrations/` on the locally running Postgres container.
+
+9.  You write tests for your database in `db/test/` and tests for your models in `models/`. These will automatically be discovered when running `yarn jest` and the `yarn jest:all:` variants. You can also run them specifically with `yarn jest:db` and `yarn jest:models`.
+
+10. (Optional) Your database and migration files look good and you're ready to check in your changes. You push your changes to a development branch then create a Pull Request into master. This triggers a [GitHub Actions](https://docs.github.com/en/actions) workflow which sets up all dependencies, including Flyway and Postgres, and ultimately runs `yarn jest:all:prod` to run all discoverable Jest tests.
+
+11. You commit your changes to master. Your app is already deployed to AWS via the included CDK stack and it is running a Free Tier RDS PostgreSQL instance. CodePipeline detects your changes in the repository and starts a CodeDeploy deployment. As part of the deployment scripts, a Flyway container is spun up to run `migrate` on your production database. Your database and app code update successfully and your changes are live.
 
 ### Feature flags
 
 This starter includes basic support for **feature flags** to support [trunk-based development](https://trunkbaseddevelopment.com). 
 
-For example, when beginning a new feature, you can:
+To illustrate, when beginning a new feature, you can:
 
 1.  Add a new flag in `.env/development.flags.js` with name `FLAG_NEW_FEATURE` and set its value to `'on'`:
 
@@ -409,7 +391,7 @@ For example, when beginning a new feature, you can:
     ```
     
 4.  Commit this code into the trunk knowing it **won't affect production code**.
-5.  When ready to **enable in production**, add the appropriate flag in `.env/production.flags.js`:
+5.  When ready to **enable in production**, add the appropriate flag in `.env/production.flags.js` and push to remote master:
 
     ```js
     // .env/production.flags.js
@@ -420,17 +402,53 @@ For example, when beginning a new feature, you can:
 
 6.  Finally, when the feature is demonstrated to work in production and all is well, remember to **remove this flag's code** to keep things tidy.
 
+## Testing
+
+The starter includes **Jest unit tests** and **Testcafe integration tests**.
+
+### Jest (unit tests)
+
+Run the included **Jest unit tests** with:
+
+```sh
+$ yarn jest:all:build   # builds all, starts custom server, then runs all tests
+$ yarn jest             # runs all tests except server (same as yarn jest:all:noserver)
+$ yarn jest:app         # only runs tests under src/
+```
+
+### Testcafe (integration tests)
+
+Testcafe can run **integration tests** in an actual (headless) browser. It supports **several browsers**, including Chrome, Firefox, and Safari.
+
+1.  First, start the server. You can do it one of two ways:
+
+    ```sh
+    $ yarn dev          # starts hot reloading src/pages/_main/ at http://localhost:4000
+    $ yarn start:test   # requires 'yarn build:all:test' first; runs at https://localhost:3000
+    ```
+
+2.  Depending on how you started the server, run `testcafe`:
+
+    ```sh
+    $ yarn testcafe       # test against http://localhost:4000
+    $ yarn testcafe:main  # test against https://localhost:3000
+    ```
+
+### PR Tests
+
+GitHub will automatically run **PR tests** via the included [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow when creating a new Pull Request into the *master* branch.
+
 ## Appendix: Preparing the AWS Prerequisites
 
-To configure your app for deployment to AWS, you will need to provide these six values in `cdk/.env/.secrets.js`:
+To configure your app for deployment to AWS, you will need to provide these six values in `cdk/my-app-cdk/.env/.secrets.js`:
 
 ```js
 const cdkGitHubConnectionArn = ''
 const cdkGitHubOwner = ''
 const cdkGitHubRepo = ''
+const cdkGitHubRepoBranch = ''
 const cdkHostedZoneId = ''
 const cdkHostname = ''
-const cdkHttpsCertificateArn = ''
 ```
 
 You will know these values after these **six steps**:
@@ -487,18 +505,18 @@ Your AWS CLI should now be good to go.
 
 *Note:* To **stop charges**, you must **delete** the hosted zone.
 
-### `|6|` Create (or import) an HTTPS Certificate in AWS Certificate Manager (ACM)
+### ~~`|6|` Create (or import) an HTTPS Certificate in AWS Certificate Manager (ACM)~~ *(not needed as of 0.1.3)*
 
-1.  Go to the **AWS Certificate Manager (ACM) console**
-2.  Choose either **Request a certificate** or **Import a certificate** (either service is **free**)
-3.  Follow the instructions until you have an HTTPS Certificate in AWS Certificate Manager
-4.  Copy its **ARN** into `cdkHttpsCertificateArn`
+1.  ~~Go to the **AWS Certificate Manager (ACM) console**~~
+2.  ~~Choose either **Request a certificate** or **Import a certificate** (either service is **free**)~~
+3.  ~~Follow the instructions until you have an HTTPS Certificate in AWS Certificate Manager~~
+4.  ~~Copy its **ARN** into `cdkHttpsCertificateArn`~~
 
 ## Appendix: Full Stack
 
 -   **Front End**
     *   [Next.js](https://nextjs.org)
--   **Back End**
+-   **Server**
     *   [Express.js](https://expressjs.com)
     *   [Next.js](https://nextjs.org)
 -   **Testing**
@@ -506,29 +524,41 @@ Your AWS CLI should now be good to go.
     *   [Supertest](https://github.com/visionmedia/supertest)
     *   [Mock Service Worker](https://mswjs.io)
     *   [Testcafe](https://testcafe.io)
--   **Styles**
-    *   [Stitches](https://stitches.dev)
--   **Linting & Formatting**
-    *   [ESLint](https://eslint.org)
--   **Code Repository**
-    *   [GitHub](https://github.com)
+    *   [GitHub Actions](https://docs.github.com/en/actions)
+-   **Database & Data Model**
+    *   [Amazon RDS for PostgreSQL](https://aws.amazon.com/rds/postgresql/)
+    *   [PostgreSQL](https://www.postgresql.org)
+    *   [Flyway](https://flywaydb.org)
+    *   [Knex.js](https://knexjs.org)
+    *   [Objection.js](https://vincit.github.io/objection.js/)
+    *   [Docker](https://www.docker.com)
 -   **Infrastructure as Code (IaC)**
     *   [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/)
 -   **Deployment**
     *   [AWS CodeDeploy](https://aws.amazon.com/codedeploy/)
 -   **Continuous Delivery**
     *   [AWS CodePipeline](https://aws.amazon.com/codepipeline/)
--   **Hosting**
+-   **Compute**
     *   [Amazon EC2](https://aws.amazon.com/ec2/)
     *   [AWS Autoscaling](https://aws.amazon.com/autoscaling/)
 -   **Network**
     *   [Amazon VPC](https://aws.amazon.com/vpc/)
     *   [AWS Elastic Load Balancing](https://aws.amazon.com/elasticloadbalancing/)
-    *   [Amazon Route 53](https://aws.amazon.com/route53/) domain name
-    *   [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) HTTPS certificate
+    *   [Amazon Route 53](https://aws.amazon.com/route53/)
+    *   [Certbot (Let's Encrypt)](https://certbot.eff.org)
+    *   [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/)
+-   **Artifact Storage**
+    *   [Amazon S3](https://aws.amazon.com/s3/)
+-   **Styles**
+    *   [Stitches](https://stitches.dev)
+-   **Linting & Formatting**
+    *   [ESLint](https://eslint.org)
+-   **Code Repository**
+    *   [GitHub](https://github.com)
 -   **Miscellaneous**
     *   *Environment variables:* [env-cmd](https://github.com/toddbluhm/env-cmd)
     *   *Transpiler:* [Babel](https://babeljs.io)
+    *   *Port forwarding*: `socat`
 
 ## Credits
 

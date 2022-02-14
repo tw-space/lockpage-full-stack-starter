@@ -1,10 +1,10 @@
 //
-// guest/index.page.jsx
+// _guest / index.page.jsx
 //
 import { styled } from '../../../stitches.config'
 import Welcome from '../../page-components/Welcome'
 
-export default function Index() {
+function Index() {
   return (
     <IndexContainer>
       <Welcome appName="Guest" />
@@ -13,3 +13,5 @@ export default function Index() {
 }
 
 const IndexContainer = styled('div', {})
+
+export default Index

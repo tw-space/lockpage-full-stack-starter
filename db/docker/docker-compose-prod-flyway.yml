@@ -1,0 +1,24 @@
+#
+# docker-compose-prod-flyway.yml
+#
+version: "3.8"
+
+services:
+
+  flyway:
+    image: flyway/flyway:latest-alpine
+    container_name: my-app-flyway
+    command: -configFiles=/flyway/conf/flyway.config migrate
+    environment:
+      - DB_PROD_DATABASE_NAME=${DB_PROD_DATABASE_NAME}
+      - DB_PROD_HOST=${DB_PROD_HOST}
+      - DB_PROD_PASSWORD=${DB_PROD_PASSWORD}
+      - DB_PROD_PORT=${DB_PROD_PORT}
+      - DB_PROD_USER=${DB_PROD_USER}
+    volumes:
+      - type: bind
+        source: ../migrations
+        target: /flyway/sql
+      - type: bind
+        source: ../conf/flyway-prod.config
+        target: /flyway/conf/flyway.config

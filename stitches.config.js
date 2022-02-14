@@ -16,6 +16,7 @@ export const {
     // https://stitches.dev/docs/tokens
     colors: {
       black: '#000000',
+      gray100: '#f3f4f6',
       placeholder: '#dadde3',
     },
     space: {},

@@ -1,10 +1,8 @@
 module.exports = {
   extends: [
     'airbnb',
-    // 'next/core-web-vitals',
+    'next/core-web-vitals',
     'plugin:@next/next/recommended',
-    // 'plugin:prettier/recommended',
-    // 'prettier',  // added to fix next/babel not loading issue
   ],
   env: {
     browser: true,
@@ -22,6 +20,16 @@ module.exports = {
       },
     ],
     'global-require': ['off'],
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
+    ],
     'import/no-extraneous-dependencies': [
       'error',
       { devDependencies: ['**/*.test.js', '**/*.spec.js', '**/jest*.js'] },

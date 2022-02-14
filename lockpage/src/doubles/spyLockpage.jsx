@@ -1,16 +1,17 @@
+/* eslint-disable */
 //
 // spyLockpage
 //
-import Lockpage from '../page-components/Lockpage'
+// import Lockpage from '../page-components/Lockpage'
 
-class spyLockpage extends Lockpage {
-  constructor(props) {
-    super(props)
-  }
+// class spyLockpage extends Lockpage {
+//   constructor(props) {
+//     super(props)
+//   }
 
-  handleUnlock(httpClient) {
-    return (event) => {
-      super.handleUnlock(httpClient)(event)
-    }
-  }
-}
+//   handleUnlock(httpClient) {
+//     return (event) => {
+//       super.handleUnlock(httpClient)(event)
+//     }
+//   }
+// }

@@ -9,16 +9,20 @@ const fs = require('fs')
 
 const endent = require('endent')
 
+const ghaRepoName = process.env.GHA_REPO_NAME || ''
+
 const secrets = {
-  jwtAud: 'GitHub workflow',
-  jwtIss: 'GitHub workflow',
+  dbDevPassword: 'postgrespassword',
+  jwtAud: 'GitHubAction',
+  jwtIss: 'GitHubAction',
   jwtSubGuest: 'jwtSubGuest test secret',
   jwtSubMain: 'jwtSubMain test secret',
-  rootPwd: '/home/runner/work/lockpage-full-stack-starter-private/lockpage-full-stack-starter-private',
+  rootPwd: `/home/runner/work/${ghaRepoName}/${ghaRepoName}`,
   secretCookie: 'secretCookie test secret',
   secretJWT: 'secretJWT test secret',
   secretKeyGuest: 'secretKeyGuest test secret',
   secretKeyMain: 'secretKeyMain test secret',
+  useHttpsFromS3: '0',
   useHttpsLocal: '0',
 }
 
@@ -26,6 +30,7 @@ const secretsString = endent(`
 //
 // secrets
 //
+const dbDevPassword = '${secrets.dbDevPassword}'
 const jwtAud = '${secrets.jwtAud}'
 const jwtIss = '${secrets.jwtIss}'
 const jwtSubGuest = '${secrets.jwtSubGuest}'
@@ -35,9 +40,11 @@ const secretCookie = '${secrets.secretCookie}'
 const secretJWT = '${secrets.secretJWT}'
 const secretKeyGuest = '${secrets.secretKeyGuest}'
 const secretKeyMain = '${secrets.secretKeyMain}'
+const useHttpsFromS3 = '${secrets.useHttpsFromS3}'
 const useHttpsLocal = '${secrets.useHttpsLocal}'
 
 module.exports = {
+  dbDevPassword,
   jwtAud,
   jwtIss,
   jwtSubGuest,
@@ -47,22 +54,20 @@ module.exports = {
   secretJWT,
   secretKeyGuest,
   secretKeyMain,
+  useHttpsFromS3,
   useHttpsLocal,
 }
+
 `)
 
-fs.writeFile('.env/.production.secrets.js', secretsString, { flag: 'wx' }, (err) => {
-  try {
-    if (err) throw err
-  } catch (error) {
-    console.error('error in populating .production.secrets.js: ', error)
-  }
-})
+try {
+  fs.writeFileSync('.env/.production.secrets.js', secretsString, { flag: 'wx' })
+} catch (error) {
+  console.error('error in populating .production.secrets.js: ', error)
+}
 
-fs.writeFile('.env/.secrets.js', secretsString, { flag: 'wx' }, (err) => {
-  try {
-    if (err) throw err
-  } catch (error) {
-    console.error('error in populating .secrets.js: ', error)
-  }
-})
+try {
+  fs.writeFileSync('.env/.secrets.js', secretsString, { flag: 'wx' })
+} catch (error) {
+  console.error('error in populating .secrets.js: ', error)
+}
