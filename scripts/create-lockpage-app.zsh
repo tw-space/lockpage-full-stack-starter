@@ -56,8 +56,11 @@ fi
 echo ""
 mkdir "$NAME"
 cd "$NAME"
-# git clone https://github.com/tw-space/lockpage-full-stack-starter .
-git clone --branch 0.1.2-famous-people git@github-tw-space:tw-space/lockpage-full-stack-starter-private .
+if [[ -z OVERRIDE_STARTER_REPO ]]; then
+  git clone https://github.com/tw-space/lockpage-full-stack-starter .
+else
+  git clone --branch "${OVERRIDE_STARTER_BRANCH:=master}" "$OVERRIDE_STARTER_REPO" .
+fi
 rm -rf .git
 git init
 
@@ -81,11 +84,15 @@ perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" package.json\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/cdk.json\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/lib/my-app-cdk-stack.ts\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/bin/my-app-cdk.ts\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/scripts/stack-precheck.sh\
 && perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-dev-fw-pg.yml\
 && perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-prod-flyway.yml\
 && perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/test.env.js\
 && perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/development.env.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/RENAME_TO.secrets.js\
 && perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" scripts/populate_secrets_test_gh.node.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
 && cd cdk/my-app-cdk\
 && rename "s/my\-app/$NAME/g" lib/my-app-cdk-stack.ts\
 && perl -i -pe"s/my\-app/$NAME/g" bin/my-app-cdk.ts\
@@ -95,6 +102,7 @@ perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" package.json\
 && cd ../..\
 && rename "s/my\-app/$NAME/g" cdk/my-app-cdk\
 && perl -i -pe"s/my\-app/$NAME/g" README.md\
+&& perl -i -pe"s/my\-app/$NAME/g" CHANGELOG.md\
 && echo ""\
 && echo -e "Successfully created app $green$NAME$color_reset from$cyan lockpage-full-stack-starter$color_reset"\
 && echo ""\

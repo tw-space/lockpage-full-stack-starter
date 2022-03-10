@@ -34,7 +34,7 @@ describe('app server', () => {
     })
 
     it('should set secure headers (except in PR test)', () => {
-      if (!(process.env.DEPLOYMENT_PURPOSE === 'PR-test')) {
+      if (!(process.env.TRUE_ENV === 'test-PR')) {
         expect(res.headers['content-security-policy']).toEqual(
           "default-src 'self';base-uri 'self';connect-src 'self';font-src 'self' data:;form-action 'self';frame-ancestors 'none';frame-src 'none';img-src 'self' data:;media-src 'none';object-src 'none';sandbox allow-forms allow-scripts allow-same-origin;style-src 'self' 'unsafe-inline';script-src 'self';script-src-attr 'none';block-all-mixed-content;upgrade-insecure-requests",
         )
@@ -170,7 +170,7 @@ describe('app server', () => {
       })
 
       it('should contain key "Secure" (except in PR test)', () => {
-        if (!(process.env.DEPLOYMENT_PURPOSE === 'PR-test')) {
+        if (!(process.env.TRUE_ENV === 'test-PR')) {
           expect(cookieObject).toContainKey('Secure')
         }
       })

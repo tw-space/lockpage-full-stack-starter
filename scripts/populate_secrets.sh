@@ -20,4 +20,4 @@ pm2 install pm2-logrotate
 cd ~/server/lockpage-full-stack-starter
 yarn
 yarn cache clean
-yarn script:secrets
+yarn secrets:prod

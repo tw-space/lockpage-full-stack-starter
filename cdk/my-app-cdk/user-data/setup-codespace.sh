@@ -2,19 +2,13 @@
 #
 # setup-codespace.sh
 
-# Send output to logfile and stdout; save fds to restore later
-exec 3>&1
-exec 4>&1
+exec 3>&1; exec 4>&1
 exec > >(tee -a /var/log/setup-codespace.log) 2>&1
 echo "[$(date)]"
-
-# echo every command
 set -x
 
-# setup on ubuntu 20.x
-export OS_NAME=ubuntu
-
 # Configure home, user, and working dir
+export OS_NAME=ubuntu
 export ZUSER=ubuntu
 adduser $ZUSER                # fails if exists
 export ZHOME=/home/$ZUSER
@@ -23,10 +17,8 @@ export CODESPACE=codespace
 export RUSER=root
 export RHOME=/root
 
-# stop script when first command fails
 set -e
 
-# Install packages for codespace
 echo "Installing packages for codespace..." \
  && apt update -y \
  && apt install -y --no-install-recommends \
@@ -121,15 +113,15 @@ chmod 0755 /usr/bin/pkexec    # CVE-2021-4034
 
 ###
 ##
-# Setup codedeploy
+# Setup aws & codedeploy
 
-# Log to file and stdout
+# Logs
 exec >&3
 exec > >(tee -a /var/log/setup-codedeploy.log) 2>&1
 echo "[$(date)]"
 
 # Install codedeploy agent dependencies
-echo "Installing dependencies for codedeploy agent..." \
+echo "Installing dependencies for aws & codedeploy agent..." \
  && apt install -y --no-install-recommends \
       awscli \
       groff \
@@ -146,14 +138,14 @@ chmod +x ./install
 # Configure codedeploy agent to run as non-root
 echo "Customizing and restarting codedeploy agent service..."
 service codedeploy-agent stop
-# configure codedeploy process to run as ZUSER
+# run as ZUSER
 sed -i "s/\"\"/\"${ZUSER}\"/g" /etc/init.d/codedeploy-agent
 if [ -e /etc/init.d/codedeploy-agent.service ]; then
   if [ ! -e /lib/systemd/system/codedeploy-agent.service ] && [ ! -e /usr/lib/systemd/system/codedeploy-agent.service ]; then
-    # move CodeDeploy service file to a correct systemd directory
+    # move to correct systemd directory
     mv /etc/init.d/codedeploy-agent.service /usr/lib/systemd/system/
   else 
-    # CodeDeploy service file found in both /etc/init.d and a correct systemd directory -- removing /etc/init.d one
+    # Remove redundant
     rm -f /etc/init.d/codedeploy-agent.service
   fi
 fi
@@ -168,7 +160,7 @@ service codedeploy-agent start
 ##
 # Setup swapspace
 
-# |0| Log to file and stdout
+# |0| Logs
 exec >&4
 exec > >(tee -a /var/log/setup-swapspace.log) 2>&1
 echo "[$(date)]"
@@ -176,22 +168,22 @@ echo "[$(date)]"
 # |1| Create swap space
 swapShow=$(sudo swapon --show)
 if [[ -z $swapShow ]]; then
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
+  fallocate -l 2G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
 fi
 
 # |2| Persist through reboots
 if [[ ! -f /etc/fstab.bak ]]; then
-  sudo cp /etc/fstab /etc/fstab.bak # backup
-  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  cp /etc/fstab /etc/fstab.bak # backup
+  echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
 fi
 
 # |3| Configure swappiness
-sudo sysctl vm.swappiness=10 # default 60
-grep -q 'vm.swappiness=10' /etc/sysctl.conf || echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+sysctl vm.swappiness=10 # default 60
+grep -q 'vm.swappiness=10' /etc/sysctl.conf || echo 'vm.swappiness=10' | tee -a /etc/sysctl.conf
 
 # |4| Configure cache pressure
-sudo sysctl vm.vfs_cache_pressure=50 # default 100
-grep -q 'vm.vfs_cache_pressure=50' /etc/sysctl.conf || echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf
+sysctl vm.vfs_cache_pressure=50 # default 100
+grep -q 'vm.vfs_cache_pressure=50' /etc/sysctl.conf || echo 'vm.vfs_cache_pressure=50' | tee -a /etc/sysctl.conf

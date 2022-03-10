@@ -52,7 +52,7 @@ const secretKeyMain = 'main secret'
 // DON'T add these to SSM parameter store:
 const dbDevPassword = 'change_this_password_right_away!'
 const ghaRepoName = '' // only set if repo name different from app name
-const rootPwd = '' // absolute path to local project dir for dev and testing
+const rootPwd = '' // absolute path to project root for dev and testing
 const useHttpsFromS3 = '0'
 const useHttpsLocal = '0'
 

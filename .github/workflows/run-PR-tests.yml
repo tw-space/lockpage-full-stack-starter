@@ -16,7 +16,6 @@ jobs:
     name: Run PR tests
     runs-on: ubuntu-latest
     env:
-      DEPLOYMENT_PURPOSE: 'PR-test'
       GHA_REPO_NAME: 'lockpage-full-stack-starter-private'
       OVERRIDE_DB_PORT: '5432'
       OVERRIDE_PORT: '80'
@@ -46,15 +45,15 @@ jobs:
         
     - name: Populate production secrets with test values
       run: |
-        yarn script:secrets:test:gh
+        yarn secrets:PR
     
     - name: Setup dev database
       run: |
-        yarn db:dev:setup
+        yarn db:PR:setup
     
     - name: Build code
       run: |
-        yarn build:all:dev
+        yarn build:all:PR
         
     - name: Start server (dev/PR)
       id: server
@@ -63,4 +62,4 @@ jobs:
     
     - name: Run all jest tests
       run: |
-        yarn jest:all:prod
+        yarn jest:all:PR

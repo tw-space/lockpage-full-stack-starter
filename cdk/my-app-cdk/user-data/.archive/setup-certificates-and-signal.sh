@@ -131,10 +131,25 @@ if [[ ! -d /etc/letsencrypt/live/$appHostname ]]; then
   ln \
     $ec2UserHome/server/.certificates/privkey.pem \
     /etc/letsencrypt/live/$appHostname/privkey.pem
-  
-  echo -e "$arrow done"
 fi
 
 # |12|
 
-echo "Complete"
+echo "Installing aws-cfn-bootstrap..."
+apt install -y --no-install-recommends python3-pip
+pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+[[ ! -f /usr/lib/systemd/system/cfn-hup ]] && ln -s /usr/local/init/ubuntu/cfn-hup /usr/lib/systemd/system/cfn-hup
+
+echo "Send cfn-signal..."
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+HEADER="X-aws-ec2-metadata-token: $TOKEN"
+MURL="-v http://169.254.169.254/latest/meta-data/"
+IID=$(curl -H "$HEADER" ${MURL}instance-id)
+REGION=$(curl -H "$HEADER" ${MURL}placement/region)
+PLID=$(aws ec2 describe-instances --region $REGION --instance-ids $IID --query 'Reservations[].Instances[].Tags[?Key==`PipelineLogicalID`].Value' --output text | head -n 1)
+STACK=$(aws ec2 describe-instances --region $REGION --instance-ids $IID --query 'Reservations[].Instances[].Tags[?Key==`Stack`].Value' --output text | head -n 1)
+/usr/local/bin/cfn-signal\
+  --success true\
+  --region $REGION\
+  --resource $PLID\
+  --stack $STACK

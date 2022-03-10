@@ -1,6 +1,6 @@
 {
   "name": "my-app-cdk-stack",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "bin": {
     "my-app-cdk": "bin/my-app-cdk.ts"
@@ -14,7 +14,8 @@
     "cdk:deploy:norollback": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
     "cdk:destroy": "$npm_package_env_PROD cdk destroy",
     "cdk:full": "yarn cdk:synth && yarn cdk:bootstrap && yarn cdk:deploy",
-    "cdk:synth": "yarn && yarn cdk:clean && $npm_package_env_PROD \\time cdk synth --path-metadata false --report-versioning false --quiet",
+    "cdk:precheck": "./scripts/stack-precheck.sh",
+    "cdk:synth": "yarn && yarn cdk:precheck && yarn cdk:clean && $npm_package_env_PROD \\time cdk synth --path-metadata false --report-versioning false --quiet",
     "cdkd": "yarn cdk:deploy",
     "cdks": "yarn cdk:synth",
     "test": "jest",
@@ -22,11 +23,11 @@
   },
   "env": {
     "DEV": "env-cmd -f ./.env/development.env.js",
-    "LOCAL": "env-cmd -f ./.env/.local.env.js",
     "PROD": "env-cmd -f ./.env/production.env.js",
     "TEST": "env-cmd -f ./.env/test.env.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.53.1",
     "aws-cdk-lib": "latest",
     "constructs": "^10.0.0",
     "env-cmd": "^10.1.0",
@@ -36,7 +37,7 @@
     "@babel/eslint-parser": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
     "@types/jest": "^26.0.10",
-    "@types/node": "10.17.27",
+    "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "aws-cdk": "latest",

@@ -1,6 +1,6 @@
 {
   "name": "create-certs-cdk-stack",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "bin": {
     "create-certs-cdk": "bin/create-certs-cdk.ts"

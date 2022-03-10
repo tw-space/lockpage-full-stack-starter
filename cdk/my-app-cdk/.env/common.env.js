@@ -2,6 +2,8 @@
 // common.env.js
 //
 const envCommon = {
+  CDK_APP_NAME: '',
+  CDK_ARTIFACT_S3_REGION: '',
   CDK_DB_DATABASE_NAME: '',
   CDK_DB_PASSWORD: '',
   CDK_DB_PORT: '',

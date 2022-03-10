@@ -6,6 +6,7 @@ import { readFileSync } from 'fs'
 
 import {
   CfnOutput,
+  // CfnResource,
   Duration,
   RemovalPolicy,
   Stack,
@@ -25,9 +26,8 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as route53 from 'aws-cdk-lib/aws-route53'
 // import * as route53targets from 'aws-cdk-lib/aws-route53-targets'
+import * as s3 from 'aws-cdk-lib/aws-s3'
 import { Construct } from 'constructs'
-
-// declare var process: { env: { [key: string]: string } }
 
 const appName = 'my-app'
 const dbAvailabilityZone = `${process.env.CDK_DEFAULT_REGION}a`
@@ -44,10 +44,22 @@ const gitHubRepoBranch = process.env.CDK_GITHUB_REPO_BRANCH || ''
 // const httpsCertificateArn = process.env.CDK_HTTPS_CERTIFICATE_ARN
 const keyPairName = process.env.KEY_PAIR_NAME || ''
 const useHttpsFromS3 = process.env.CDK_USE_HTTPS_FROM_S3 || ''
+const stackName = 'MyAppStack'
+
+type MyAppStackProps = StackProps & {
+  artifactBucketName: string,
+  artifactBucketExists: boolean,
+}
+// declare var process: { env: { [key: string]: string } }
 
 export class MyAppStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: MyAppStackProps) {
     super(scope, id, props)
+
+    // Props
+
+    const artifactBucketName = props?.artifactBucketName || ''
+    const artifactBucketExists = props?.artifactBucketExists || false
 
     //
     // |0| Guard preconditions
@@ -58,11 +70,12 @@ export class MyAppStack extends Stack {
         dbAvailabilityZone.match(/^[a-z]+-([a-z]+-)?[a-z]+-[1-9][abcdefg]$/) !== null,
         'Error: dbAvailabilityZone must be valid',
       )
-      assert(dbPassword !== '', 'Error: dbPassword cannot be null')
-      assert(dbUser !== '', 'Error: dbUser cannot be null')
-      assert(keyPairName !== '', 'Error: keyPairName cannot be null')
-      assert(hostedZoneId !== '', 'Error: hostedZoneId cannot be null')
-      assert(hostname !== '', 'Error: hostname cannot be null')
+      assert(artifactBucketName !== '', 'Error: artifactBucketName prop cannot be null')
+      assert(dbPassword !== '', 'Error: CDK_DB_PASSWORD cannot be null')
+      assert(dbUser !== '', 'Error: CDK_DB_USER cannot be null')
+      assert(keyPairName !== '', 'Error: KEY_PAIR_NAME cannot be null')
+      assert(hostedZoneId !== '', 'Error: CDK_HOSTED_ZONE_ID cannot be null')
+      assert(hostname !== '', 'Error: CDK_HOSTNAME cannot be null')
     } catch (e) {
       console.error(e)
       process.exit(1)
@@ -254,6 +267,17 @@ export class MyAppStack extends Stack {
         }),
       ],
     }))
+    ec2Role.attachInlinePolicy(new iam.Policy(this, 'Ec2DescribeInstancesPolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          actions: [
+            'ec2:DescribeInstances',
+            'ec2:DescribeTags',
+          ],
+          resources: ['*'],
+        }),
+      ],
+    }))
 
     // |3| Prepare setup scripts as user data
 
@@ -329,6 +353,7 @@ export class MyAppStack extends Stack {
       // TODO: add blockDevices
       instanceName: ec2InstanceName,
       keyName: keyPairName,
+      propagateTagsToVolumeOnCreation: true,
       requireImdsv2: true,
       role: ec2Role,
       securityGroup: ec2SecurityGroup,
@@ -337,9 +362,25 @@ export class MyAppStack extends Stack {
         subnetType: ec2.SubnetType.PUBLIC,
       },
     })
-    Tags.of(ec2Instance).add('Name', ec2InstanceName) // for CodeDeploy
 
-    // |8| Allow connections between ec2 and database
+    // |8| Assign tags
+
+    Tags.of(ec2Instance).add('Name', ec2InstanceName) // for CodeDeploy
+    Tags.of(ec2Instance).add('Stack', stackName)
+    
+    // |9| Set CreationPolicy for ec2 instance for cfn-signal
+
+    // const cfnEc2Instance = ec2Instance.node.defaultChild as CfnResource
+    // const ec2LogicalId = cfnEc2Instance.logicalId
+    // Tags.of(ec2Instance).add('Ec2LogicalID', ec2LogicalId) // for cfn-signal
+    // cfnEc2Instance.cfnOptions.creationPolicy = {
+    //   resourceSignal: {
+    //     count: 1,
+    //     timeout: 'PT4M',
+    //   },
+    // }
+
+    // |10| Allow connections between ec2 and database
 
     // rdsPgInstance.connections.allowFrom(ec2Asg, ec2.Port.tcp(dbPort))
     rdsPgInstance.connections.allowFrom(ec2Instance, ec2.Port.tcp(dbPort))
@@ -487,23 +528,103 @@ export class MyAppStack extends Stack {
     // |F| Create pipeline
     //
 
-    // |1| Create CodeDeploy application
+    // |1| Create an S3 artifact bucket using name passed in to stack
+    
+    let s3ArtifactBucket
+    if (artifactBucketExists) {
+      s3ArtifactBucket = s3.Bucket.fromBucketAttributes(this, `${appName}-bucket`, {
+        bucketName: artifactBucketName,
+      })
+    } else {
+      s3ArtifactBucket = new s3.Bucket(this, `${appName}-bucket`, {
+        accessControl: s3.BucketAccessControl.PRIVATE,
+        autoDeleteObjects: false,
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        bucketKeyEnabled: false,
+        bucketName: artifactBucketName,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        enforceSSL: true,
+        removalPolicy: RemovalPolicy.RETAIN,
+        versioned: false,
+      })
+    }
+
+    // |2| Create empty pipeline
+
+    if (!s3ArtifactBucket) {
+      throw new Error("s3 Artifact Bucket isn't defined")
+    }
+
+    const pipeline = new codepipeline.Pipeline(this, `${appName}-pipeline`, {
+      artifactBucket: s3ArtifactBucket,
+      crossAccountKeys: false, // prevents new KMS key ($)
+      pipelineName: `${appName}-pipeline`,
+    })
+
+    // |3| Add dependency on ec2 instance
+    //     (Alternative to try if waiting until user data completes is ever needed:
+    //        1. create WaitConditionHandle construct
+    //        2. create WaitCondition which takes WaitConditionHandle's ref (cfnOptions)
+    //        3. add CreationPolicy to WaitCondition
+    //        4. pass WaitCondition's logical ID to ec2 as tag (or pass WaitConditionHandle somehow)
+    //        5. add dependency to pipeline on WaitCondition)
+
+    pipeline.node.addDependency(ec2Instance)
+
+    // |4| Add Source_To_S3 stage (#1) with GitHub source
+    
+    // Hypothesis: This artifact will create in target S3 bucket due to its
+    // association with the Source Actions
+    const sourceOutput = new codepipeline.Artifact('Source_Artifact')
+    const sourceGitHubAction = new codepipelineActions.CodeStarConnectionsSourceAction({
+      actionName: 'Source_To_S3',
+      branch: gitHubRepoBranch, // default: master
+      connectionArn: gitHubConnectionArn,
+      output: sourceOutput,
+      owner: gitHubOwner,
+      repo: gitHubRepo,
+    })
+    
+    pipeline.addStage({
+      stageName: 'Source_To_S3',
+      actions: [sourceGitHubAction],
+    })
+
+    // |5| Deploy app to stack
+
     const codeDeployApp = new codedeploy.ServerApplication(this, `${appName}-cdk-app`, {
       applicationName: `${appName}-cdk-app`, // optional
     })
 
-    // |2| Create IAM Role for Deployment Group for CodeDeploy
     const codeDeployRoleForDG = new iam.Role(this, 'codedeploy-iam-role-for-dg', {
       assumedBy: new iam.ServicePrincipal('codedeploy.amazonaws.com'),
     })
+    
     codeDeployRoleForDG.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         'service-role/AWSCodeDeployRole',
       ),
     )
-    
-    // // |3a| Create Deployment Group to auto scaling group and load balancer
 
+    // Deployment Group to instance
+    const deploymentGroup = new codedeploy.ServerDeploymentGroup(this, `${appName}-deployment-group`, {
+      application: codeDeployApp,
+      autoRollback: {
+        failedDeployment: false, // default: true
+        stoppedDeployment: false, // default: false
+        deploymentInAlarm: false, // default: true if you provided any alarms, false otherwise
+      },
+      deploymentConfig: codedeploy.ServerDeploymentConfig.ONE_AT_A_TIME,
+      deploymentGroupName: `${appName}-deployment-group`,
+      ec2InstanceTags: new codedeploy.InstanceTagSet({
+        Name: [ec2InstanceName],
+      }),
+      role: codeDeployRoleForDG,
+      // autoScalingGroups: [ ec2Asg, ],
+      // loadBalancer: codedeploy.LoadBalancer.application(ec2TargetGroup),
+    })
+    
+    // |alt| Deployment Group to auto scaling group and load balancer
     // const deploymentGroup = new codedeploy.ServerDeploymentGroup(
     //   this, `${appName}-deployment-group`, {
     //     application: codeDeployApp,
@@ -541,87 +662,15 @@ export class MyAppStack extends Stack {
     //   }
     // )
 
-    // |3b| Create Deployment Group to instance
-
-    const deploymentGroup = new codedeploy.ServerDeploymentGroup(this, `${appName}-deployment-group`, {
-      application: codeDeployApp,
-      autoRollback: {
-        failedDeployment: false, // default: true
-        stoppedDeployment: false, // default: false
-        deploymentInAlarm: false, // default: true if you provided any alarms, false otherwise
-      },
-      deploymentConfig: codedeploy.ServerDeploymentConfig.ONE_AT_A_TIME,
-      deploymentGroupName: `${appName}-deployment-group`,
-      ec2InstanceTags: new codedeploy.InstanceTagSet({
-        Name: [ec2InstanceName],
-      }),
-      role: codeDeployRoleForDG,
-
-      // autoScalingGroups: [ ec2Asg, ],
-      // loadBalancer: codedeploy.LoadBalancer.application(ec2TargetGroup),
-    })
-
-    // |4| Prepare CodeCommit source info as Source Action
-    // const sourceOutput = new codepipeline.Artifact()
-    // const sourceRepo = codecommit.Repository.fromRepositoryName(
-    //   this,
-    //   'hello-world-node-cc',
-    //   'hello-world-node',
-    // )
-    // const sourceCodeCommitAction = new codepipelineActions.CodeCommitSourceAction({
-    //   actionName: 'CodeCommit',
-    //   repository: sourceRepo,
-    //   output: sourceOutput,
-    // })
-
-    // |4alt1| This is Github version 1 with oauth token
-    // Docs say GitHub requires Secrets Manager Secret @ $0.40/mo
-    // But ssmSecure via Parameter Store is free
-    // const sourceOutput = new codepipeline.Artifact()
-    // const sourceGitHubAction = new codepipelineActions.GitHubSourceAction({
-    //   actionName: 'DownloadSource',
-    //   owner: gitHubOwner,
-    //   repo: gitHubRepo,
-    //   oauthToken: SecretValue.ssmSecure(`/${gitHubOwner}/github-token`),
-    //   output: new codepipeline.Artifact(),
-    //   branch: 'master',   // default: 'master'
-    // })
-
-    // |4alt2| Github version 2 using (poorly named) Codestar Connection
-    const sourceOutput = new codepipeline.Artifact()
-    const sourceGitHubAction = new codepipelineActions.CodeStarConnectionsSourceAction({
-      actionName: `Source_${appName}`,
-      owner: gitHubOwner,
-      repo: gitHubRepo,
-      branch: gitHubRepoBranch, // default: master
-      connectionArn: gitHubConnectionArn,
-      output: sourceOutput,
-    })
-
-    // |5| Prepare deploy info as Deploy Action
     const deployAction = new codepipelineActions.CodeDeployServerDeployAction({
-      actionName: `Deploy_${appName}`,
+      actionName: 'Deploy_App_To_Stack',
       deploymentGroup,
       input: sourceOutput,
     })
 
-    // |6| Finally, create two-stage pipeline with earlier Source and Deploy actions
-    const pipeline = new codepipeline.Pipeline(this, `${appName}-cdk-pipeline`, {
-      crossAccountKeys: false, // prevents new KMS key ($)
-      pipelineName: `${appName}-cdk-pipeline`,
-      stages: [
-        {
-          stageName: 'Source',
-          actions: [
-            sourceGitHubAction,
-            // sourceCodeCommitAction,
-          ],
-        },
-        {
-          stageName: 'Deploy',
-          actions: [deployAction],
-        },
-      ],
+    pipeline.addStage({
+      stageName: 'Deploy_App_To_Stack',
+      actions: [deployAction],
     })
 
     //
@@ -630,16 +679,16 @@ export class MyAppStack extends Stack {
 
     // Create outputs
 
-    new CfnOutput(this, 'Hostname', { value: hostname })
-    new CfnOutput(this, 'UsingHTTPS', { value: useHttpsFromS3 === '1' ? 'Yes' : 'No' })
-    new CfnOutput(this, 'NextSteps', {
-      value: 'Whitelist your machine IP in the ec2 instance security group then visit your app in the browser at the hostname above',
-    })
-    new CfnOutput(this, 'InstancePublicIP', { value: ec2Instance.instancePublicIp })
-    new CfnOutput(this, 'DBEndpoint', { value: rdsPgInstance.instanceEndpoint.socketAddress })
     new CfnOutput(this, 'AvailabilityZones', {
       value: Stack.of(this).availabilityZones.toString(),
     })
+    new CfnOutput(this, 'DBEndpoint', { value: rdsPgInstance.instanceEndpoint.socketAddress })
+    new CfnOutput(this, 'Hostname', { value: hostname })
+    new CfnOutput(this, 'InstancePublicIP', { value: ec2Instance.instancePublicIp })
+    new CfnOutput(this, 'NextSteps', {
+      value: 'Whitelist your machine IP in the ec2 instance security group then visit your app in the browser at the hostname above',
+    })
+    new CfnOutput(this, 'UsingHTTPS', { value: useHttpsFromS3 === '1' ? 'Yes' : 'No' })
     // new cdk.CfnOutput(this, 'Key Name', { value: 'key-pair-name' })
   }
 }

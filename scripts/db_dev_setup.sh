@@ -92,5 +92,5 @@ docker-compose -f db/docker/docker-compose-dev-fw-pg.yml up -d
 # |7| Success output
 echo ""
 echo -e "$green$success$color_reset"
-echo -e "$cyan$chevron$color_reset Run flyway commands with$cyan yarn db:flyway$color_reset, e.g.$cyan yarn db:flyway migrate$color_reset"
+echo -e "$cyan$chevron$color_reset Run flyway commands with$cyan yarn db:dev:flyway$color_reset, e.g.$cyan yarn db:dev:flyway migrate$color_reset"
 echo -e "$cyan$chevron$color_reset Connect to postgres when needed with$cyan yarn db:dev:connect:psql$color_reset"

@@ -8,13 +8,13 @@ hooks:
   # ApplicationStop:          # Gracefully stop or remove previous
   BeforeInstall:              # Before agent copies files
     - location: scripts/install_dependencies.sh
-      timeout: 120
+      timeout: 240
       # runas: ubuntu         # Changed codedeploy agent to run as ubuntu
   AfterInstall:               # Configure app, permissions
     - location: scripts/populate_secrets.sh
-      timeout: 120
+      timeout: 240
     - location: scripts/db_prod_migrate.sh
-      timeout: 120
+      timeout: 240
   ApplicationStart:           # Start app, restart stopped services
     - location: scripts/start_server.sh
       timeout: 240

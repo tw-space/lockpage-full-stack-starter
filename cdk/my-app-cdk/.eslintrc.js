@@ -75,6 +75,7 @@
       ignoreComments: true,
     }],
     'no-unused-vars': ['warn'],
+    'no-use-before-define': ['error', 'nofunc'],
     'object-curly-newline': ['error', {
       consistent: true,
     }],

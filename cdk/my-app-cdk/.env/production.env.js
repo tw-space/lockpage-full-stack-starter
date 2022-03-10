@@ -3,6 +3,8 @@
 //
 const envCommon = require('./common.env.js')
 const {
+  cdkAppName,
+  cdkArtifactS3Region,
   cdkDbDatabaseName,
   cdkDbPassword,
   cdkDbPort,
@@ -20,6 +22,8 @@ const {
 
 const envProduction = {
   ...envCommon,
+  CDK_APP_NAME: cdkAppName || '',
+  CDK_ARTIFACT_S3_REGION: cdkArtifactS3Region || '',
   CDK_DB_DATABASE_NAME: cdkDbDatabaseName || '',
   CDK_DB_PASSWORD: cdkDbPassword || '',
   CDK_DB_PORT: cdkDbPort || '',

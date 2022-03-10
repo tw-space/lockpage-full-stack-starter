@@ -6,7 +6,6 @@ const envCommon = require('./common.env.js')
 const flagsTest = require('./test.flags.js')
 const {
   dbDevPassword,
-  ghaRepoName,
   jwtAud,
   jwtIss,
   jwtSubGuest,
@@ -28,11 +27,10 @@ const envTest = {
   ...envCommon,
   ...flagsTest,
   DB_DEV_DATABASE_NAME: 'my_app_db',
-  DB_DEV_HOST: 'postgres',
+  DB_DEV_HOST: 'host.docker.internal',
   DB_DEV_PASSWORD: dbDevPassword || '',
   DB_DEV_PORT: dbPort,
   DB_DEV_USER: 'my_app_user',
-  GHA_REPO_NAME: ghaRepoName || 'lockpage-full-stack-starter',
   JWT_AUD: jwtAud || '',
   JWT_ISS: jwtIss || '',
   JWT_SUB_GUEST: jwtSubGuest || '',

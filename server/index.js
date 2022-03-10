@@ -17,12 +17,12 @@ const { Strings } = require('../resources/Strings')
 
 const port = parseInt(process.env.PORT, 10) || 3000
 const isDev = process.env.TRUE_ENV !== 'production'
+const isPRTest = process.env.TRUE_ENV === 'test-PR'
 const nextApp = nextStart({ isDev, customServer: true, hostname: 'localhost', port })
 const handle = nextApp.getRequestHandler()
 
 const lockpageStaticDir = path.resolve(__dirname, `../${process.env.LOCKPAGE_DIR}`)
 const loginPath = process.env.LOGIN_PATH
-const isPRTest = process.env.DEPLOYMENT_PURPOSE === 'PR-test'
 const useHttpsLocal = process.env.USE_HTTPS_LOCAL === '1'
 const useHttpsFromS3 = process.env.USE_HTTPS_FROM_S3 === '1'
 

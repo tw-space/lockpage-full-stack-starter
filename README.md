@@ -92,19 +92,28 @@ The starter is configured with **two variations** to start, initially called **m
 
 To try this locally:
 
-1.  Rename `.env/RENAME_TO.secrets.js` to `.secrets.js`
-2.  In `.env/.secrets.js`, update `rootPwd` with the absolute path to your project directory
-3.  To build the project and serve it locally in development mode, run:
+1.  First, run the setup script and follow any instructions that appear:
+
+    ```sh
+    $ yarn dev:setup
+    ```
+
+2.  Once all setup steps are complete, build the project and serve it locally in development mode by running:
 
     ```sh
     $ yarn serve:dev
     ```
 
-4.  Visit http://localhost:3000 in a browser
-5.  Enter inputs a few times
-6.  Enter `main secret` to access the **main** app variation
-7.  In the same tab, navigate to http://localhost:3000/enter via the address bar
-8.  Enter `guest secret` to access the **guest** variation
+3.  Visit http://localhost:3000 in a browser
+4.  Try a few inputs
+5.  Enter `main secret` to access the **main** app variation
+6.  In the same tab, navigate to http://localhost:3000/enter via the address bar
+7.  Enter `guest secret` to access the **guest** variation
+8.  To stop the custom Express server, it is not enough to stop the foreground process as it is run with `pm2` as a background process. Instead, run:
+
+    ```sh
+    $ yarn stop
+    ```
 
 ### Try the variations directly
 
@@ -130,11 +139,18 @@ To run the **guest** variation:
 
 2.  Visit http://localhost:4000
 
+To stop the hot reloading server, simply stop the foreground process with `Ctrl-C`.
+
 ### Use https locally
 
 By default, both development servers will run in *http*, not *https*. The starter simplifies the setup for **local https development**, however, this is true only for the **custom server** (started with `yarn serve:dev` or `yarn start:dev`, *not* the hot reloading server started with `yarn dev`). 
 
-Run `yarn serve:dev` or `yarn https:local:setup` to get started.
+Steps to use https locally:
+
+1.  Run `yarn https:local:setup` and follow any instructions
+2.  Run `mkcert -install` if directed to do so in the output from step 1. Enter the *Sudo password* when prompted. 
+3.  Run `yarn serve:dev` (or `yarn start:dev` if pages are already built) to serve locally with *https*
+4.  Visit the app in the browser at https://localhost:3000
 
 ### Deploy to production with AWS CDK & AWS CodePipeline
 
@@ -144,8 +160,8 @@ Once your AWS prerequisites are set up, the entire first-time stack and code dep
 
 Here are the steps:
 
-1.  Rename `cdk/my-app-cdk/.env/RENAME_TO.secrets.js` to `.secrets.js`
-2.  Commit & push your new project to a GitHub repo
+1.  Run `yarn cdk:precheck` or manually rename `RENAME_TO.secrets.js` to `.secrets.js` in `cdk/my-app-cdk/.env/`
+2.  Commit & push your new full project directory to a GitHub repo
 3.  Ensure the following are prepared for AWS (see [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites) for a detailed walkthrough):
     1. An **AWS account** created
     2. **AWS CLI** configured
@@ -303,6 +319,42 @@ Let's add an app variation called `cinematic`.
 
 10. That's it! Run the server locally with `yarn serve:dev` to try it. Then to test in production, create pages under `_cinematic/`, commit & push your changes to GitHub, wait a few minutes for your changes to deploy, then visit your domain to check the result.
 
+## Test
+
+The starter includes **Jest unit tests** and **Testcafe integration tests**.
+
+### Jest (unit tests)
+
+Run the included **Jest unit tests** with:
+
+```sh
+$ yarn jest:all:build   # builds all, starts custom server, then runs all tests
+$ yarn jest             # runs all tests except server (same as yarn jest:all:noserver)
+$ yarn jest:app         # only runs tests under src/
+```
+
+### Testcafe (integration tests)
+
+Testcafe can run **integration tests** in an actual (headless) browser. It supports **several browsers**, including Chrome, Firefox, and Safari.
+
+1.  First, start the server. You can do it one of two ways:
+
+    ```sh
+    $ yarn dev          # starts hot reloading src/pages/_main/ at http://localhost:4000
+    $ yarn start:test   # requires 'yarn build:all:test' first; runs at https://localhost:3000
+    ```
+
+2.  Depending on how you started the server, run `testcafe`:
+
+    ```sh
+    $ yarn testcafe       # test against http://localhost:4000
+    $ yarn testcafe:main  # test against https://localhost:3000
+    ```
+
+### PR Tests
+
+GitHub will automatically run **PR tests** via the included [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow when creating a new Pull Request into the *master* branch.
+
 ## Development
 
 ### Database and data models
@@ -401,42 +453,6 @@ To illustrate, when beginning a new feature, you can:
     ```
 
 6.  Finally, when the feature is demonstrated to work in production and all is well, remember to **remove this flag's code** to keep things tidy.
-
-## Testing
-
-The starter includes **Jest unit tests** and **Testcafe integration tests**.
-
-### Jest (unit tests)
-
-Run the included **Jest unit tests** with:
-
-```sh
-$ yarn jest:all:build   # builds all, starts custom server, then runs all tests
-$ yarn jest             # runs all tests except server (same as yarn jest:all:noserver)
-$ yarn jest:app         # only runs tests under src/
-```
-
-### Testcafe (integration tests)
-
-Testcafe can run **integration tests** in an actual (headless) browser. It supports **several browsers**, including Chrome, Firefox, and Safari.
-
-1.  First, start the server. You can do it one of two ways:
-
-    ```sh
-    $ yarn dev          # starts hot reloading src/pages/_main/ at http://localhost:4000
-    $ yarn start:test   # requires 'yarn build:all:test' first; runs at https://localhost:3000
-    ```
-
-2.  Depending on how you started the server, run `testcafe`:
-
-    ```sh
-    $ yarn testcafe       # test against http://localhost:4000
-    $ yarn testcafe:main  # test against https://localhost:3000
-    ```
-
-### PR Tests
-
-GitHub will automatically run **PR tests** via the included [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) workflow when creating a new Pull Request into the *master* branch.
 
 ## Appendix: Preparing the AWS Prerequisites
 
