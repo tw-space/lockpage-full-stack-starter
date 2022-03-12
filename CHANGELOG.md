@@ -4,19 +4,45 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.1.4 — CI Pipeline ()
+## 0.1.5 — Fixes to Create App Script (2022-04-05)
+
+This release adds **fixes** to the **create-lockpage-app** script.
+
+### Adds
+
+* Conversion of `MyApp` to pascal cased transformation of app name in *create-lockpage-app* script
+* Third party notice for this starter in `THIRD_PARTY_NOTICES.md`
+* `CHANGELOG_NEW.md` with empty changelog which is renamed to `CHANGELOG.md` at create
+* Automatic copying of `RENAME_TO.secrets.js` to `.secrets.js` files
+* Populates `rootPwd` in `.secrets.js`
+
+### Changes
+
+* Defaults `version` to `0.0.0` in `package.json` after create
+* Defaults `license` to `UNLICENSED` in `package.json` after create
+* Removes `LICENSE` file after create
+* Clears `description` field in `package.json` after create
+* Removes `repository` info from `package.json` after create
+* Improves `README`
+* Improves preparations for `create-certs-cdk` stack after create
+
+## 0.1.4 — CI Pipeline (2022-03-11)
 
 This release adds **Continuous Integration** into the CodePipeline.
 
-### Added
+### Adds
 
-
+* Generated unique S3 artifact bucket name to be reused by subsequent runs of CodePipeline
+* Fixes to create-lockpage-app script
+* Scripts to simplify project setup (dev:setup, db:dev:setup)
+* Simplified https local setup via https:local:setup script
+* CodePipeline dependency on ec2 creation in cdk script
 
 ## 0.1.3 — Database (2022-03-03)
 
 The focus for this release is adding a **database**.
 
-### Added
+### Adds
 
 * Amazon RDS PostgreSQL instance (t2.micro, free tier) in vpc via app CDK stack
 * Database migrations run with Flyway via Docker Compose
@@ -33,7 +59,7 @@ The focus for this release is adding a **database**.
 * Script to check for and give guidance on setting up local HTTPS when testing and serving the full built project locally including the lockpage (see `yarn https:local:setup`)
 * Better logging for EC2 user data and CodeDeploy scripts. Find user data logs in */var/log* and CodeDeploy logs in *~/log* on the EC2 instance.
 
-### Changed
+### Changes
 
 * EC2 Auto Scaling group and load balancer changed to EC2 instance in app cdk (to ensure EC2 and RDS single instances are placed in same availability zone, thus avoiding data transfer costs across AZs)
 
@@ -41,7 +67,7 @@ The focus for this release is adding a **database**.
 
 This release adds support for **feature flags**.
 
-### Added
+### Adds
 
 * Helpers for **feature flags**. Details in *README*.
 
@@ -49,7 +75,7 @@ This release adds support for **feature flags**.
 
 This release adds support for **PR tests** in GitHub via a GitHub Actions workflow.
 
-### Added
+### Adds
 
 * GitHub Actions workflow that triggers PR tests to run on creating a new Pull Request into *master*
 
@@ -57,7 +83,7 @@ This release adds support for **PR tests** in GitHub via a GitHub Actions workfl
 
 First public release of this starter. See *README* for details.
 
-### Added
+### Adds
 
 * AWS CDK stack which quickly deploys your project to a domain name you own. The stack creates:
   * Elastic Application Load Balancer configured to listen with an HTTPS certificate you own and store in AWS Certificate Manager (free to create)

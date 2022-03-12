@@ -191,9 +191,5 @@
   },
   "msw": {
     "workerDirectory": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tw-space/lockpage-full-stack-starter"
   }
 }

@@ -33,16 +33,16 @@
 //      --overwrite
 
 // ADD these to SSM Parameter Store (local and prod values can differ):
-const jwtAud = 'localhost'
-const jwtIss = 'localhost'
-const jwtSubGuest = 'jwtSubGuest secret'
-const jwtSubMain = 'jwtSubMain secret'
-const secretCookie = 'secretCookie secret'
-const secretJWT = 'secretJWT secret'
-const secretKeyGuest = 'guest secret'
-const secretKeyMain = 'main secret'
+const jwtAud = 'localhost'                  // set to domain name in prod
+const jwtIss = 'localhost'                  // set to domain name in prod
+const jwtSubGuest = 'jwtSubGuest secret'    // unique value for guest variation
+const jwtSubMain = 'jwtSubMain secret'      // unique value for main variation
+const secretCookie = 'secretCookie secret'  // signed secret for cookie
+const secretJWT = 'secretJWT secret'        // signed secret for JWT
+const secretKeyGuest = 'guest secret'       // password for guest variation
+const secretKeyMain = 'main secret'         // password for main variation
 
-// ALSO ADD these to SSM parameter store:
+// ALSO ADD these to SSM Parameter Store (must match cdk/my-app-cdk/.env/.secrets.js):
 //
 //   /my-app/prod/dbProdDatabaseName  (e.g. 'my_app_db')
 //   /my-app/prod/dbProdPassword      (your database password)

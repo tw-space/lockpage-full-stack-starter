@@ -3,8 +3,8 @@
 #
 
 # REMOVE FROM GITIGNORE FOR YOUR PROJECT:
-# cdk context (account, region, AZ info)
 cdk.context.json
+yarn.lock
 
 # Include all .env files in directory but not .secrets
 !.env/

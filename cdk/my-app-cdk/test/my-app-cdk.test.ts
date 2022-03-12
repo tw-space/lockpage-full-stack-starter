@@ -3,7 +3,7 @@
 // import * as MyApp from '../lib/cdk-lockpage-stack';
 
 // example test. To run these tests, uncomment this file along with the
-// example resource in lib/cdk-lockpage-stack.ts
+// example resource in lib/my-app-cdk-stack.ts
 test('SQS Queue Created', () => {
 //   const app = new cdk.App();
 //     // WHEN

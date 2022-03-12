@@ -1,6 +1,6 @@
 {
   "name": "create-certs-cdk-stack",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "bin": {
     "create-certs-cdk": "bin/create-certs-cdk.ts"
@@ -10,8 +10,8 @@
     "cdk": "cdk",
     "cdk:bootstrap": "$npm_package_env_PROD cdk bootstrap",
     "cdk:clean": "rm -rf cdk.out",
-    "cdk:deploy": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
-    "cdk:deploy:norollback": "$npm_package_env_PROD \\time cdk deploy --require-approval never --no-rollback",
+    "cdk:deploy": "$npm_package_env_PROD \\time cdk deploy --require-approval never --report-versioning false --no-rollback",
+    "cdk:deploy:norollback": "$npm_package_env_PROD \\time cdk deploy --require-approval never --report-versioning false --no-rollback",
     "cdk:destroy": "$npm_package_env_PROD cdk destroy",
     "cdk:full": "yarn cdk:synth && yarn cdk:bootstrap && yarn cdk:deploy",
     "cdk:precheck": "$npm_package_env_PROD scripts/certs-precheck.sh",

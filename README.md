@@ -160,28 +160,44 @@ Once your AWS prerequisites are set up, the entire first-time stack and code dep
 
 Here are the steps:
 
-1.  Run `yarn cdk:precheck` or manually rename `RENAME_TO.secrets.js` to `.secrets.js` in `cdk/my-app-cdk/.env/`
-2.  Commit & push your new full project directory to a GitHub repo
-3.  Ensure the following are prepared for AWS (see [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites) for a detailed walkthrough):
-    1. An **AWS account** created
-    2. **AWS CLI** configured
-    3. A **domain name** purchased in or imported into Amazon Route 53
-    4. A Route 53 **Hosted Zone** created for domain name
-    5. **Connection to GitHub** account/repo created in AWS Dev Tools
-    6. ~~**HTTPS certificate** created or imported in AWS Certificate Manager~~ *(not needed as of 0.1.3)*
-4.  Set the proper values for these in `cdk/my-app-cdk/.env/.secrets.js`
-5.  To serve your web app using free, properly signed HTTPS encryption, navigate to `cdk/create-certs/` and run `yarn cdk:full`. When successfully complete, destroy the stack, and set `useHttpsFromS3` to `'1'` in `cdk/my-app-cdk/.env/.secrets.js`.
-6.  Optionally change any project secret defaults in `.env/.secrets.js`
-7.  Put all project secrets prefixed with `jwt`, `secret`, or `dbProd` in your AWS SSM Parameter Store (see steps in `.env/.secrets.js`)
-8.  From `cdk/my-app-cdk/`, synthesize and deploy your app infrastructure stack with:
+1.  Change directory to `cdk/my-app-cdk/`
+2.  Run `yarn cdk:precheck` or manually rename `RENAME_TO.secrets.js` to `.secrets.js` in `cdk/my-app-cdk/.env/`
+3.  Commit & push your new full project directory to a GitHub repo
+4.  Ensure the following are prepared for AWS (see [Appendix: Preparing the AWS Prerequisites](#appendix-preparing-the-aws-prerequisites) for a detailed walkthrough):
+    1.  An **AWS account** created
+    2.  **AWS CLI** configured
+    3.  A **domain name** purchased in or imported into Amazon Route 53
+    4.  A Route 53 **Hosted Zone** created for domain name
+    5.  **Connection to GitHub** account/repo created in AWS Dev Tools
+    6.  ~~**HTTPS certificate** created or imported in AWS Certificate Manager~~ *(not needed as of 0.1.3)*
+5.  Set the proper values for these in `cdk/my-app-cdk/.env/.secrets.js`
+6.  To serve your web app using free, properly signed **HTTPS** encryption:
+    1.  Navigate to `cdk/create-certs-cdk/` 
+    2.  Set the required `CDK_CERT_` values in `.env/.secrets.js`
+    3.  Decide to store values in **SSM Parameter Store** or to hardcode them in a file, then follow the instructions accordingly in `user-data/run-certbot.sh`
+    4.  Run `yarn cdk:full` and follow any instructions
+    5.  When successfully complete:
+        1.  **Destroy** the stack
+        2.  Set `useHttpsFromS3` to `'1'` in `cdk/my-app-cdk/.env/.secrets.js` and in `.env/.secrets.js`
+7.  Optionally change any project secret defaults in `.env/.secrets.js`
+8.  Put all project secrets prefixed with `jwt`, `secret`, or `dbProd` in your AWS SSM Parameter Store per the steps in `.env/.secrets.js`. For example:
+
+    ```sh
+    $ aws ssm put-parameter \
+      --name '/my-app/prod/jwtSubMain' \
+      --value 'jwtSubMain secret' \
+      --type 'SecureString'
+    ```
+
+9.  From `cdk/my-app-cdk/`, synthesize and deploy your app infrastructure stack with:
 
     ```sh
     $ yarn cdk:full
     ```
 
-9.  When that's complete, go to **CodePipeline console**, ignore the deployment error, and click **Release Change** to retry the deployment
-10. When that's complete, visit your domain name (using **https**) in a browser
-11. Push changes to master to **continuously deploy** your app to production
+10. When that's complete, go to **CodePipeline console** and wait until the deployment is fully complete
+11. When complete, visit your domain name (using **https**) in a browser
+12. Push future changes to master to **continuously deploy** your app to production
 
 ### Destroy the CDK stack
 

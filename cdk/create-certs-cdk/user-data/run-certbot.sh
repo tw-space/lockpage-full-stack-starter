@@ -3,13 +3,40 @@
 # run-certbot.sh
 
 # PREPARATIONS:
-# |1| Set SSM Parameter Store settings in next section
-# |2| Configure CDK_CERT values in step |4| or SSM Parameter Store
-# |3| Verify certbot options are as desired in step |8.5|
-
-# |IMPORTANT| Set to the region used for SSM Parameter Store
+# |1|  Decide whether to use parameters in SSM Parameter Store (safer)
+#      or to hardcode values in this file; 
+# |2a| If using Parameter Store, set the following values and follow the instructions:
 USE_SSM_PARAMETERS='true' # 'true' to use SSM Parameters
-CDK_CERT_SSM_REGION='us-west-2'
+CDK_CERT_SSM_REGION='us-west-2' # region where SSM Parameters are stored
+#
+#     Put these parameters in SSM Parameter Store:
+#
+#     Contact email with Let's Encrypt:
+#     $ aws ssm put-parameter \
+#       --name '/create-certs/cdkCertEmail' \
+#       --value 'YOUR_EMAIL' \
+#       --type 'SecureString'
+#
+#     Region for S3 bucket to store https certificates:
+#     $ aws ssm put-parameter \
+#       --name '/create-certs/cdkCertS3Region' \
+#       --value 'YOUR_S3_REGION' \
+#       --type 'SecureString'
+#
+#     Desired Primary Domain (CN):
+#     $ aws ssm put-parameter \
+#       --name '/create-certs/cdkCertPrimaryDomain' \
+#       --value 'YOUR_PRIMARY_DOMAIN' \
+#       --type 'SecureString'
+#
+#     (optional) One optional secondary domain:
+#     $ aws ssm put-parameter \
+#       --name '/create-certs/cdkCertOneSecondaryDomain' \
+#       --value 'YOUR_ONE_ADDITIONAL_DOMAIN' \
+#       --type 'SecureString'
+#
+# |2b| If not using SSM Parameters, hardcore the values in step |4|
+# |3| Verify certbot options are as desired in step |8.5|
 
 # |0| Send logs to file and stdout; set errexit to start
 set -e # enable errexit
@@ -143,8 +170,8 @@ else
 fi
 
 # |5| Combine primary and secondary domains into single comma-separated string
-if [[ -z CDK_CERT_ONE_SECONDARY_DOMAIN ]]; then
-  CDK_CERT_ALL_DOMAINS=CDK_CERT_PRIMARY_DOMAIN
+if [[ -z "$CDK_CERT_ONE_SECONDARY_DOMAIN" ]]; then
+  CDK_CERT_ALL_DOMAINS="$CDK_CERT_PRIMARY_DOMAIN"
 else
   CDK_CERT_ALL_DOMAINS=${CDK_CERT_PRIMARY_DOMAIN},${CDK_CERT_ONE_SECONDARY_DOMAIN}
 fi

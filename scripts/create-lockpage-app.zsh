@@ -56,7 +56,7 @@ fi
 echo ""
 mkdir "$NAME"
 cd "$NAME"
-if [[ -z OVERRIDE_STARTER_REPO ]]; then
+if [[ -z "$OVERRIDE_STARTER_REPO" ]]; then
   git clone https://github.com/tw-space/lockpage-full-stack-starter .
 else
   git clone --branch "${OVERRIDE_STARTER_BRANCH:=master}" "$OVERRIDE_STARTER_REPO" .
@@ -64,8 +64,10 @@ fi
 rm -rf .git
 git init
 
-# Prepare underscored version of NAME for database variables
-UNDERSCORED_NAME=${NAME//-/_}
+# Prepare different formats of NAME and DATE
+UNDERSCORED_NAME=${NAME//-/_} # database variables
+PASCAL_CASE_NAME=$(perl -pe 's/(^|-|_)(\w)/\U$2/g' <<<"$NAME") # cdk
+TODAYS_DATE="$(date +'%Y-%m-%d')"
 
 # Configure starter with project's name
 perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" package.json\
@@ -80,29 +82,51 @@ perl -i -pe"s/lockpage\-full\-stack\-starter/$NAME/g" package.json\
 && perl -i -pe"s/lockpage\-full\-stack\-starter[-a-z]*/$NAME/g" .github/workflows/run-PR-tests.yml\
 && perl -i -pe"s/my\-app/$NAME/g" .env/common.env.js\
 && perl -i -pe"s/my\-app/$NAME/g" .env/RENAME_TO.secrets.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/RENAME_TO.secrets.js\
+&& cp .env/RENAME_TO.secrets.js .env/.secrets.js\
+&& BASEDIR_PWD=$(pwd)\
+&& perl -i -pe"s{rootPwd = ''}{rootPwd = '$BASEDIR_PWD'}g" .env/.secrets.js\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
+&& cp cdk/my-app-cdk/.env/RENAME_TO.secrets.js cdk/my-app-cdk/.env/.secrets.js\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/package.json\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/cdk.json\
-&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/lib/my-app-cdk-stack.ts\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/bin/my-app-cdk.ts\
+&& perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/test/my-app-cdk.test.ts\
 && perl -i -pe"s/my\-app/$NAME/g" cdk/my-app-cdk/scripts/stack-precheck.sh\
 && perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-dev-fw-pg.yml\
 && perl -i -pe"s/my\-app/$NAME/g" db/docker/docker-compose-prod-flyway.yml\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/test.env.js\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/development.env.js\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/RENAME_TO.secrets.js\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" scripts/populate_secrets_test_gh.node.js\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" cdk/my-app-cdk/.env/RENAME_TO.secrets.js\
-&& cd cdk/my-app-cdk\
-&& rename "s/my\-app/$NAME/g" lib/my-app-cdk-stack.ts\
-&& perl -i -pe"s/my\-app/$NAME/g" bin/my-app-cdk.ts\
-&& rename "s/my\-app/$NAME/g" bin/my-app-cdk.ts\
-&& rename "s/my\-app/$NAME/g" test/my-app-cdk.test.ts\
-&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/RENAME_TO.secrets.js\
-&& cd ../..\
-&& rename "s/my\-app/$NAME/g" cdk/my-app-cdk\
 && perl -i -pe"s/my\-app/$NAME/g" README.md\
 && perl -i -pe"s/my\-app/$NAME/g" CHANGELOG.md\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/test.env.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" .env/development.env.js\
+&& perl -i -pe"s/my_app/$UNDERSCORED_NAME/g" scripts/populate_secrets_test_gh.node.js\
+&& perl -i -pe"s/MyApp/$PASCAL_CASE_NAME/g" cdk/my-app-cdk/lib/my-app-cdk-stack.ts\
+&& perl -i -pe"s/MyApp/$PASCAL_CASE_NAME/g" cdk/my-app-cdk/bin/my-app-cdk.ts\
+&& perl -i -pe"s/MyApp/$PASCAL_CASE_NAME/g" cdk/my-app-cdk/test/my-app-cdk.test.ts\
+&& cd cdk/my-app-cdk\
+&& rm -f .gitignore\
+&& mv USE_THIS.gitignore .gitignore\
+&& perl -i -pe's/("version": ")([0-9.]+)(",)/${1}0.0.0$3/g' package.json\
+&& rename "s/my\-app/$NAME/g" lib/my-app-cdk-stack.ts\
+&& rename "s/my\-app/$NAME/g" bin/my-app-cdk.ts\
+&& rename "s/my\-app/$NAME/g" test/my-app-cdk.test.ts\
+&& cd ../create-certs-cdk\
+&& rm -f .gitignore\
+&& mv USE_THIS.gitignore .gitignore\
+&& cp .env/RENAME_TO.secrets.js .env/.secrets.js\
+&& cd ../..\
+&& rm -f .gitignore\
+&& mv USE_THIS.gitignore .gitignore\
+&& rename "s/my\-app/$NAME/g" cdk/my-app-cdk\
+&& perl -i -pe's/("version": ")([0-9.]+)(",)/${1}0.0.0$3/g' package.json\
+&& perl -i -pe's/("license": ")(MIT)(",)/${1}UNLICENSED$3/g' package.json\
+&& rm -f LICENSE\
+&& perl -i -pe's/("description": ")([A-Za-z0-9. ]+)(",)/$1$3/g' package.json\
+&& rm -f CHANGELOG.md\
+&& mv CHANGELOG_NEW.md CHANGELOG.md\
+&& perl -i -pe"s/YYYY\-MM\-DD/$TODAYS_DATE/g" CHANGELOG.md\
 && echo ""\
 && echo -e "Successfully created app $green$NAME$color_reset from$cyan lockpage-full-stack-starter$color_reset"\
 && echo ""\
